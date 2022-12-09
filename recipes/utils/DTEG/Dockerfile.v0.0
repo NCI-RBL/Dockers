@@ -1,0 +1,25 @@
+FROM nciccbr/ccbr_ubuntu_base_20.04:v1.4
+
+ENV STAR_VERSION 2.7.10a
+
+# install star
+WORKDIR /opt2
+RUN wget --no-check-certificate https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz && \
+    tar -xzf ${STAR_VERSION}.tar.gz && \
+    rm -f ${STAR_VERSION}.tar.gz && \
+    cd /opt2/STAR-${STAR_VERSION}/source && \
+    make STAR
+ENV PATH=/opt2/STAR-${STAR_VERSION}/source:$PATH
+
+
+# cleanup etc
+COPY Dockerfile /opt2/Dockerfile
+RUN chmod a+rX /opt2/Dockerfile
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="vishal.koparde@nih.gov"
+LABEL github_handle="kopardev"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
