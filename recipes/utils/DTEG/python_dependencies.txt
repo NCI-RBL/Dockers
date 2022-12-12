@@ -1,2 +1,4 @@
 pathos
 pysam
+twobitreader
+gffutils
