@@ -1,5 +1,7 @@
 FROM nciccbr/ccbr_ubuntu_base_20.04:v1.4
 
+ENV TAG="v0.1"
+
 ENV STAR_VERSION 2.7.10a
 
 # install star
@@ -18,8 +20,8 @@ COPY dependencies.R /opt2
 RUN Rscript dependencies.R
 
 # cleanup etc
-COPY Dockerfile /opt2/Dockerfile
-RUN chmod a+rX /opt2/Dockerfile
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
 WORKDIR /data2
 RUN apt-get clean
 
