@@ -3,6 +3,11 @@ FROM nciccbr/deteg:v0.1
 ENV TAG="v0.2"
 
 
+WORKDIR /opt2
+COPY python_dependencies.txt ./
+
+RUN pip install --no-cache-dir --upgrade pip \&&
+    pip install --no-cache-dir -r requirements.txt
 
 
 # cleanup etc
