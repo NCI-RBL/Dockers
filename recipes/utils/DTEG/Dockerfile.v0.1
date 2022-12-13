@@ -15,7 +15,7 @@ ENV PATH=/opt2/STAR-${STAR_VERSION}/source:$PATH
 
 # install skewer
 WORKDIR /opt2
-RUN git clone https://github.com/relipmoc/skewer.git
+RUN git clone https://github.com/relipmoc/skewer.git &&\
     cd /opt2/skewer && \
     make && \
     make install
