@@ -5,10 +5,8 @@ ENV TAG="v0.2"
 WORKDIR /opt2
 COPY python_dependencies.txt ./
 
-RUN pip3 install --no-cache-dir --upgrade pip3  && \
-    pip3 install --no-cache-dir -r requirements.txt
-
-
+RUN pip3 install --no-cache-dir -r python_dependencies.txt
+    
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
 RUN chmod a+rX /opt2/Dockerfile.${TAG}
