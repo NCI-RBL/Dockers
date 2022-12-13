@@ -2,3 +2,4 @@ pathos
 pysam
 twobitreader
 gffutils
+HTSeq
