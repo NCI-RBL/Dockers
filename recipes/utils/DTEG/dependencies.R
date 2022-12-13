@@ -3,3 +3,5 @@ if (!require("BiocManager", quietly = TRUE))
 
 BiocManager::install("DESeq2")
 
+install.packages('reshape2')
+install.packages("plyr")
