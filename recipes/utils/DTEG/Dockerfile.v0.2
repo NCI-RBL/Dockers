@@ -6,6 +6,7 @@ WORKDIR /opt2
 COPY python_dependencies.txt ./
 
 RUN pip3 install --no-cache-dir -r python_dependencies.txt
+COPY 80S_basic_workflow.py ./
     
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
