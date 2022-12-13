@@ -6,7 +6,7 @@ ENV TAG="v0.2"
 WORKDIR /opt2
 COPY python_dependencies.txt ./
 
-RUN pip3 install --no-cache-dir --upgrade pip \&&
+RUN pip3 install --no-cache-dir --upgrade pip3 \&&
     pip3 install --no-cache-dir -r requirements.txt
 
 
