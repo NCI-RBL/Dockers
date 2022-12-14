@@ -18,6 +18,7 @@ RUN chmod a+x /opt2/80S_basic_workflow.py && \
     chmod a+x /opt2/rphelper.py && \
     chmod a+x /opt2/densebuilder_main.py && \
 
+ENV PATH="/opt2/:$PATH"
 
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
