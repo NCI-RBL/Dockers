@@ -11,7 +11,14 @@ COPY StarAlign_main.py ./
 COPY makeavggene_main.py ./
 COPY rphelper.py ./
 COPY densebuilder_main.py ./
-    
+
+RUN chmod a+x /opt2/80S_basic_workflow.py && \
+    chmod a+x /opt2/StarAlign_main.py && \
+    chmod a+x /opt2/makeavggene_main.py && \
+    chmod a+x /opt2/rphelper.py && \
+    chmod a+x /opt2/densebuilder_main.py && \
+
+
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
 RUN chmod a+rX /opt2/Dockerfile.${TAG}
