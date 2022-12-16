@@ -40,7 +40,8 @@ class SubunitProfiling(object):
 
 	def StarAlignment(self):
 		rootpath= '%s/%s' %(self.datapath, self.exp)
-		commandstring= 'python StarAlign_main.py --rootpath %s --file %s --ncrnaDir %s --genomeDir %s --mismatch %s --fiveprimetrim %s --linker %s' %(rootpath, self.exp, self.ncrnaDir, self.genomeDir, self.mismatch, self.fiveprimetrim, self.linker)
+		#commandstring= 'python StarAlign_main.py --rootpath %s --file %s --ncrnaDir %s --genomeDir %s --mismatch %s --fiveprimetrim %s --linker %s' %(rootpath, self.exp, self.ncrnaDir, self.genomeDir, self.mismatch, self.fiveprimetrim, self.linker)
+		commandstring= 'StarAlign_main.py --rootpath %s --file %s --ncrnaDir %s --genomeDir %s --mismatch %s --fiveprimetrim %s --linker %s' %(rootpath, self.exp, self.ncrnaDir, self.genomeDir, self.mismatch, self.fiveprimetrim, self.linker)
 		print(commandstring)
 		os.system(commandstring)
 		print('STAR Align Success')
@@ -187,7 +188,8 @@ class SubunitProfiling(object):
 			densityfileout= '%s/%s_%sf_' %(densityfilepath,self.exp,size)
 			if not os.path.exists(densityfilepath): os.makedirs(densityfilepath)
 			riboshiftdict= "{"+str(size)+':[0]'+"}"
-			commandstring= 'python densebuilder_main.py --bamfileinput %s --GTFfile %s --twobitfile %s --assignment %s --riboshiftdict %s --threshold %s --totreads %s --outputdata %s --bamfileoutput %s' %(bamfileinput,self.GTFfile,self.twobitfile,assignment,riboshiftdict,self.threshold,totreads,densityfileout,bamfileoutput)
+			#commandstring= 'python densebuilder_main.py --bamfileinput %s --GTFfile %s --twobitfile %s --assignment %s --riboshiftdict %s --threshold %s --totreads %s --outputdata %s --bamfileoutput %s' %(bamfileinput,self.GTFfile,self.twobitfile,assignment,riboshiftdict,self.threshold,totreads,densityfileout,bamfileoutput)
+			commandstring= 'densebuilder_main.py --bamfileinput %s --GTFfile %s --twobitfile %s --assignment %s --riboshiftdict %s --threshold %s --totreads %s --outputdata %s --bamfileoutput %s' %(bamfileinput,self.GTFfile,self.twobitfile,assignment,riboshiftdict,self.threshold,totreads,densityfileout,bamfileoutput)
 			print(commandstring)
 			os.system(commandstring)
 
@@ -198,7 +200,8 @@ class SubunitProfiling(object):
 			densityfileout= '%s/%s_%sf_' %(densityfilepath,self.exp,size)
 			if not os.path.exists(densityfilepath): os.makedirs(densityfilepath)
 			riboshiftdict= "{"+str(size)+':[0]'+"}"
-			commandstring= 'python densebuilder_main.py --bamfileinput %s --GTFfile %s --twobitfile %s --assignment %s --riboshiftdict %s --threshold %s --totreads %s --outputdata %s --bamfileoutput %s' %(bamfileinput,self.GTFfile,self.twobitfile,assignment,riboshiftdict,self.threshold,totreads,densityfileout,bamfileoutput)
+			#commandstring= 'python densebuilder_main.py --bamfileinput %s --GTFfile %s --twobitfile %s --assignment %s --riboshiftdict %s --threshold %s --totreads %s --outputdata %s --bamfileoutput %s' %(bamfileinput,self.GTFfile,self.twobitfile,assignment,riboshiftdict,self.threshold,totreads,densityfileout,bamfileoutput)
+			commandstring= 'densebuilder_main.py --bamfileinput %s --GTFfile %s --twobitfile %s --assignment %s --riboshiftdict %s --threshold %s --totreads %s --outputdata %s --bamfileoutput %s' %(bamfileinput,self.GTFfile,self.twobitfile,assignment,riboshiftdict,self.threshold,totreads,densityfileout,bamfileoutput)
 			print(commandstring)
 			os.system(commandstring)
 
@@ -222,7 +225,8 @@ class SubunitProfiling(object):
 			size,assignment,alignpos= parameters[0],parameters[1],parameters[2]
 			trspdictfilestring= '%s/DensityUnnormalized/density%sM%s_%s/%s_%sf_' %(rootpath,assignment,mismatch,size,self.exp,size)
 			outfilebase= '%s/%s_%sf'%(outfolder,self.exp,size)
-			commandstring= 'python makeavggene_main.py --regionlength5 %s --regionlength3 %s --trspdictfilestring %s --UTRfilestring %s --filtermodule %s --exclusionmodule %s --threshold %s --alignpos %s --equalweight %s --outfilebase %s' %(self.regionlength5,self.regionlength3,trspdictfilestring,self.UTRfilestring,self.filtermodule,self.exclusionmodule,thresh,alignpos,self.equalweight,outfilebase)
+			#commandstring= 'python makeavggene_main.py --regionlength5 %s --regionlength3 %s --trspdictfilestring %s --UTRfilestring %s --filtermodule %s --exclusionmodule %s --threshold %s --alignpos %s --equalweight %s --outfilebase %s' %(self.regionlength5,self.regionlength3,trspdictfilestring,self.UTRfilestring,self.filtermodule,self.exclusionmodule,thresh,alignpos,self.equalweight,outfilebase)
+			commandstring= 'makeavggene_main.py --regionlength5 %s --regionlength3 %s --trspdictfilestring %s --UTRfilestring %s --filtermodule %s --exclusionmodule %s --threshold %s --alignpos %s --equalweight %s --outfilebase %s' %(self.regionlength5,self.regionlength3,trspdictfilestring,self.UTRfilestring,self.filtermodule,self.exclusionmodule,thresh,alignpos,self.equalweight,outfilebase)
 			print(commandstring)
 			os.system(commandstring)
 
@@ -230,7 +234,8 @@ class SubunitProfiling(object):
 			size,assignment,alignpos= parameters[0],parameters[1],parameters[2]
 			trspdictfilestring= '%s/DensityNormalized/density%sM%s_%s/%s_%sf_' %(rootpath,assignment,mismatch,size,self.exp,size)
 			outfilebase= '%s/%s_%sf'%(outfolder,self.exp,size)
-			commandstring= 'python makeavggene_main.py --regionlength5 %s --regionlength3 %s --trspdictfilestring %s --UTRfilestring %s --filtermodule %s --exclusionmodule %s --threshold %s --alignpos %s --equalweight %s --outfilebase %s' %(self.regionlength5,self.regionlength3,trspdictfilestring,self.UTRfilestring,self.filtermodule,self.exclusionmodule,thresh,alignpos,self.equalweight,outfilebase)
+			#commandstring= 'python makeavggene_main.py --regionlength5 %s --regionlength3 %s --trspdictfilestring %s --UTRfilestring %s --filtermodule %s --exclusionmodule %s --threshold %s --alignpos %s --equalweight %s --outfilebase %s' %(self.regionlength5,self.regionlength3,trspdictfilestring,self.UTRfilestring,self.filtermodule,self.exclusionmodule,thresh,alignpos,self.equalweight,outfilebase)
+			commandstring= 'makeavggene_main.py --regionlength5 %s --regionlength3 %s --trspdictfilestring %s --UTRfilestring %s --filtermodule %s --exclusionmodule %s --threshold %s --alignpos %s --equalweight %s --outfilebase %s' %(self.regionlength5,self.regionlength3,trspdictfilestring,self.UTRfilestring,self.filtermodule,self.exclusionmodule,thresh,alignpos,self.equalweight,outfilebase)
 			print(commandstring)
 			os.system(commandstring)
 

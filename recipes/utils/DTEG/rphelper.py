@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Helper functions for ribosome profiling pipelines
 Needs a better name

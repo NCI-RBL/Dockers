@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # This file holds the programs used in the part of the workflow invovled in creating ribosome density data structures.
 import argparse
 import pysam 
