@@ -1,0 +1,20 @@
+FROM wilfriedguiblet/dteg:v0.2
+
+ENV TAG="v0.3"
+
+WORKDIR /opt2
+COPY HTSeq_RNAseq.py ./
+ENV PATH=/opt2/:$PATH
+
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
