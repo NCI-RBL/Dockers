@@ -4,7 +4,8 @@
 Helper functions for ribosome profiling pipelines
 Needs a better name
 """
-import GFF
+#import GFF
+from BCBio import GFF
 import urllib
 import csv
 
