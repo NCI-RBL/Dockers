@@ -4,6 +4,7 @@ ENV TAG="v0.3"
 
 WORKDIR /opt2
 COPY HTSeq_RNAseq.py ./
+RUN chmod a+x /opt2/HTSeq_RNAseq.py
 ENV PATH=/opt2/:$PATH
 
 
