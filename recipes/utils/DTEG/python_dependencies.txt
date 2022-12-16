@@ -3,3 +3,4 @@ pysam
 twobitreader
 gffutils
 HTSeq
+bcbio-gff
