@@ -4,3 +4,4 @@ twobitreader
 gffutils
 HTSeq
 bcbio-gff
+pandas

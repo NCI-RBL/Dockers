@@ -4,7 +4,8 @@
 import argparse
 import pysam 
 import twobitreader
-import GFF
+#import GFF
+from BCBio import GFF
 from Bio.Seq import Seq
 #from rpgetreads import SeqReadGetter
 

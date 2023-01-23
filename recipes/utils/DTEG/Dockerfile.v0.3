@@ -4,9 +4,14 @@ ENV TAG="v0.3"
 
 WORKDIR /opt2
 COPY HTSeq_RNAseq.py ./
+COPY StarAlign_RNAseq_paired.py ./
+COPY Merge_HTSeq_Counts.py ./
+COPY DTEG.R ./
 RUN chmod a+x /opt2/HTSeq_RNAseq.py
+RUN chmod a+x /opt2/StarAlign_RNAseq_paired.py
+RUN chmod a+x /opt2/Merge_HTSeq_Counts.py
+RUN chmod a+x /opt2/DTEG.R
 ENV PATH=/opt2/:$PATH
-
 
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
