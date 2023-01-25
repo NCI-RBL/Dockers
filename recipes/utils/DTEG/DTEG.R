@@ -26,6 +26,8 @@ batch <- args[4]
 
 # Read and merge count matrices
 ### MODIFIED BY WILFRIED GUIBLET ###
+setwd("/data2")
+
 ribo <- read.delim(ribo_file)  
 rownames(ribo) <- ribo[,1]
 ribo[,1] <- NULL
