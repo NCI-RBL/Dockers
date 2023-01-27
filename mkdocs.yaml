@@ -96,4 +96,11 @@ markdown_extensions:
 # Page Tree
 nav:
   - Intro : index.md
-
+  - MOP2:
+    - Description: MOP2/descript.md
+    - Initialize: MOP2/init.md
+    - Run: MOP2/run.md
+  - DTEG:
+    - Description: DTEG/descript.md
+    - Initialize: DTEG/init.md
+    - Run: DTEG/run.md
