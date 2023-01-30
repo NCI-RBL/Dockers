@@ -43,3 +43,21 @@ Download the following files in the working directory:
 - [DTEG_RBL.nf](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/DTEG_RBL.nf)
 - [DTEG_RBL.sh](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/DTEG_RBL.sh)
 - [nextflow.config](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/nextflow.config)
+
+
+### Sample Info
+
+Create the sample_info.txt as the following example:
+
+
+```bash
+SampleID        Condition       SeqType Batch
+HEK_WT1 1       RIBO    1
+HEK_WT2 1       RIBO    2
+HEK_ThumD_KO1   2       RIBO    1
+HEK_ThumD_KO2   2       RIBO    2
+HEK293WT1RNA    1       RNA     1
+HEK293WT2RNA    1       RNA     2
+HEK293ThumpD1KO1RNA     2       RNA     1
+HEK293ThumpD1KO2RNA     2       RNA     2 
+```
