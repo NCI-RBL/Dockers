@@ -4,7 +4,7 @@ Simply submit the pipeline as a slurm job:
 
 ```bash
 sbatch DTEG_RBL.sh
-``
+```
 
 If you do not have slurm and/or are running the pipeline on a local computer (not recommended), you may run the different parts of the workflow as follow:
 
