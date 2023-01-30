@@ -4,4 +4,6 @@ This pipeline integrates RNA-seq and Ribo-seq to calculate translation efficienc
 
 See the original [publication](https://pubmed.ncbi.nlm.nih.gov/31763789/) and GitHub [repository](https://github.com/SGDDNB/translational_regulation) for more information.
 
+To run this pipeline, you will need to have NextFlow and Singularity installed (already available on Biowulf and FRCE).
+
 For more questions about this wrapper of the DTEG pipeline, you may contact [Colin Wu](mailto:colin.wu2@nih.gov) or [Wilfried Guiblet](mailto:guibletwm@nih.gov).
