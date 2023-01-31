@@ -44,6 +44,7 @@ Download the following files in the working directory:
 - [DTEG_RBL.sh](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/DTEG_RBL.sh)
 - [nextflow.config](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/nextflow.config)
 
+Open the nextflow.config file and change /mnt/rnabl-work/Guiblet/CCBRRBL8/NextFlow/ to your working directory (full path)
 
 ### Sample Info
 
