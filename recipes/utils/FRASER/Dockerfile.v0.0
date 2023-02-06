@@ -1,0 +1,58 @@
+FROM nciccbr/ccbr_ubuntu_base_20.04:v2.1
+
+ENV TAG="v0.1"
+
+ENV STAR_VERSION 2.7.10a
+
+# install star
+WORKDIR /opt2
+RUN wget --no-check-certificate https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz && \
+    tar -xzf ${STAR_VERSION}.tar.gz && \
+    rm -f ${STAR_VERSION}.tar.gz && \
+    cd /opt2/STAR-${STAR_VERSION}/source && \
+    make STAR
+ENV PATH=/opt2/STAR-${STAR_VERSION}/source:$PATH
+
+# install skewer
+WORKDIR /opt2
+RUN git clone https://github.com/relipmoc/skewer.git &&\
+    cd /opt2/skewer && \
+    make && \
+    make install
+ENV PATH=/opt2/skewer:$PATH
+
+# install seqtk
+WORKDIR /opt2
+RUN git clone https://github.com/lh3/seqtk.git &&\
+    cd /opt2/seqtk && \
+    make
+ENV PATH=/opt2/seqtk:$PATH
+
+
+# R dependencies
+ADD https://cran.r-project.org/src/contrib/Archive/locfit/locfit_1.5-8.tar.gz /opt2
+RUN Rscript -e 'install.packages("akima")' && \
+  Rscript -e 'install.packages("/opt2/locfit_1.5-8.tar.gz",repos = NULL, type="source")' && \
+  Rscript -e 'install.packages("BiocManager")' && \
+  Rscript -e 'BiocManager::install("DESeq2")' && \
+  Rscript -e 'BiocManager::install("apeglm")' && \
+  Rscript -e 'install.packages("reshape2")' && \
+  Rscript -e 'install.packages("plyr")'
+
+
+
+#WORKDIR /opt2
+#COPY dependencies.R /opt2
+#RUN /opt2/R/4.2.2/bin/Rscript dependencies.R
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
