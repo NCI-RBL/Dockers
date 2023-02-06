@@ -33,7 +33,7 @@ theme:
       toggle:
         icon: material/toggle-switch
         name: Switch to light mode
-  logo: assets/images/doc-book.svg
+  logo: https://ccbr.github.io/HowTos/assets/images/doc-book.svg
   favicon: assets/images/favicon.png
 
 # Plugins
