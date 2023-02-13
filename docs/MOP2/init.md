@@ -20,9 +20,7 @@ cp /scratch/cluster_scratch/guibletwm/MOP2_repo/ ./
 
 Download the following files in the working directory:
 
-```bash
 - [PolyATail.sh](https://github.com/RBL-NCI/Dockers/blob/main/workflows/MOP2/PolyATail.sh)
-```
 
 
 ### Paths
