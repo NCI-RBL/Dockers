@@ -4,7 +4,7 @@ ENV TAG="v0.1"
 # install FRASER
 RUN Rscript -e 'BiocManager::install("FRASER")'
 RUN Rscript -e 'BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene")'
-RUN Rscript -e 'BiocManager::install("org.Hs.eg.db)")'
+RUN Rscript -e 'BiocManager::install("org.Hs.eg.db")'
 
 WORKDIR /opt2
 COPY FRASER_ANALYSIS.r ./
