@@ -1,3 +1,5 @@
+### Run pipeine:
+
 Use the command:
 
 bash PolyATail.sh /path_to_fast5_files/
