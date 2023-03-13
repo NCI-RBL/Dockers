@@ -1,8 +1,8 @@
 
 echo "Start processing all _ready files in ./read_files/ folder..."
 
-mkdir analysis_files
-mkdir analysis_results
+mkdir -p analysis_files
+mkdir -p analysis_results
 
 cd ready_files
 
@@ -16,22 +16,22 @@ cat ../ready_files/samples | while read A
 do
     echo "processing $A..."
     echo "mapping to rRNA..mode -n 0 -l 20..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20  --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/rRNA   --un "$A"_rm_rRNA.fastq  --al  "$A"_rRNA.fastq       ../ready_files/"$A" temp.txt
+    bowtie -n 0 -l 20  --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/rRNA   --un "$A"_rm_rRNA.fastq  --al  "$A"_rRNA.fastq       ../ready_files/"$A" temp.txt
     echo "mapping to tRNA..mode -n 0 -l 20..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/tRNA   --un "$A"_rm_rRNA_tRNA.fastq  --al  "$A"_tRNA.fastq       "$A"_rm_rRNA.fastq temp.txt
+    bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/tRNA   --un "$A"_rm_rRNA_tRNA.fastq  --al  "$A"_tRNA.fastq       "$A"_rm_rRNA.fastq temp.txt
     echo "mapping to snoRNA..mode -n 0 -l 20..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/snoRNA --un "$A"_rm_rRNA_tRNA_snoRNA.fastq  --al  "$A"_snoRNA.fastq     "$A"_rm_rRNA_tRNA.fastq temp.txt
+    bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/snoRNA --un "$A"_rm_rRNA_tRNA_snoRNA.fastq  --al  "$A"_snoRNA.fastq     "$A"_rm_rRNA_tRNA.fastq temp.txt
     echo "mapping to miRNA_precusor.. n mode mismatch 0 seed length 20..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20 --best --norc --sam /data/RBL_NCI/Gu/miRNA_NGS/index/miRNA_Aug_2018/hsa_hairpin_all_2018  --un "$A"_rm_rRNA_tRNA_snoRNA_miRNA.fastq  --al  "$A"_miRNA.fastq  "$A"_rm_rRNA_tRNA_snoRNA.fastq    "$A"_miRNA.sam
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20 --best --norc --sam /data/RBL_NCI/Gu/miRNA_NGS/index/miRNA_Aug_2018/hsa_hairpin_hc_2018   --al  "$A"_hc_miRNA.fastq  "$A"_miRNA.fastq    "$A"_hc_miRNA.sam
+    bowtie -n 0 -l 20 --best --norc --sam /data/RBL_NCI/Gu/miRNA_NGS/index/miRNA_Aug_2018/hsa_hairpin_all_2018  --un "$A"_rm_rRNA_tRNA_snoRNA_miRNA.fastq  --al  "$A"_miRNA.fastq  "$A"_rm_rRNA_tRNA_snoRNA.fastq    "$A"_miRNA.sam
+    bowtie -n 0 -l 20 --best --norc --sam /data/RBL_NCI/Gu/miRNA_NGS/index/miRNA_Aug_2018/hsa_hairpin_hc_2018   --al  "$A"_hc_miRNA.fastq  "$A"_miRNA.fastq    "$A"_hc_miRNA.sam
 
      echo "mapping to mRNA.. mode -n 0 -l 20..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/refMRNA          --un "$A"_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq --al "$A"_mRNA.fastq   "$A"_rm_rRNA_tRNA_snoRNA_miRNA.fastq temp.txt
+    bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/refMRNA          --un "$A"_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq --al "$A"_mRNA.fastq   "$A"_rm_rRNA_tRNA_snoRNA_miRNA.fastq temp.txt
     echo "mapping to refSeq.. mode -n 0 -l 20..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/ref_transcripts          --un "$A"_others.fastq --al "$A"_others_ref.fastq   "$A"_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq temp.txt
+    bowtie -n 0 -l 20 --best --norc /data/RBL_NCI/Gu/miRNA_NGS/index/human/ref_transcripts          --un "$A"_others.fastq --al "$A"_others_ref.fastq   "$A"_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq temp.txt
     echo "processing $A..."
     echo "mapping to mycoplasma H..mode v1..."
-    /data/RBL_NCI/Gu/miRNA_NGS/tools/bowtie-1.1.1/bowtie -v 1 --sam /data/RBL_NCI/Gu/miRNA_NGS/index/Mycoplasma_hyo --un "$A"_unmappable.fastq  --al "$A"_mycoplasmaH.fastq   ./"$A"_others.fastq  "$A"_mycoplasma.sam
+    bowtie -v 1 --sam /data/RBL_NCI/Gu/miRNA_NGS/index/Mycoplasma_hyo --un "$A"_unmappable.fastq  --al "$A"_mycoplasmaH.fastq   ./"$A"_others.fastq  "$A"_mycoplasma.sam
 
 
 

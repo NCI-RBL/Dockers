@@ -1,0 +1,18 @@
+FROM wilfriedguiblet/isomir:v0.1
+
+ENV TAG="v0.2"
+
+WORKDIR /opt2
+
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
