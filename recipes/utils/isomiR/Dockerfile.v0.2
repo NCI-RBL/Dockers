@@ -4,6 +4,85 @@ ENV TAG="v0.2"
 
 WORKDIR /opt2
 
+#RUN wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz && \
+#    tar -xf Python-3.5.0.tgz && \
+#    cd Python-3.5.0 && \
+#    ./configure --enable-optimizations && \
+#    make install
+
+
+
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_23.1.0-1-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
+
+
+# Update pip
+RUN pip3 install -U pip
+
+# Put conda in path so we can use conda activate
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+
+
+#RUN conda init bash && \
+#RUN conda create -n QuackmiR python=3.5 && \
+#    conda activate QuackmiR
+
+
+# Dependencies
+
+RUN conda install -c bioconda dropbox && \
+#    conda install -c bioconda filechunkio && \
+#    conda install -c bioconda ftputil && \
+#    conda install -c bioconda pysftp && \
+#    conda install -c conda-forge python-dateutil && \
+#    conda install -c bioconda snakemake && \
+#    conda install -c bioconda urllib3 && \
+    conda install -c bioconda biopython && \
+    conda install -c anaconda docutils && \
+    conda install -c anaconda ecdsa && \
+    conda install -c anaconda mkl && \
+    conda install -c anaconda numpy && \
+    conda install -c anaconda openssl && \
+    conda install -c anaconda pandas && \
+    conda install -c conda-forge paramiko && \
+    conda install -c anaconda pycrypto && \
+#    conda install python=3.5.0=0 && \
+    conda install -c conda-forge pytz && \
+    conda install -c conda-forge pyyaml && \
+    conda install -c conda-forge zlib && \
+    conda install -c anaconda readline && \
+    conda install -c anaconda requests && \
+    conda install -c conda-forge setuptools && \
+    conda install -c conda-forge six && \
+    conda install -c anaconda sqlite && \
+    conda install -c anaconda tk && \
+    conda install -c conda-forge wheel && \
+    conda install -c anaconda xz && \
+    conda install -c anaconda yaml
+
+
+RUN pip install pystan && \
+    pip install dropbox && \
+    pip install filechunkio && \
+    pip install ftputil && \
+    pip install pysftp && \
+    pip install python-dateutil && \
+    pip install snakemake && \
+    pip install urllib3 \
+    pip install git+https://github.com/infoscout/weighted-levenshtein.git
+
+
+
+# Install QuagmiR
+
+RUN git clone https://github.com/Gu-Lab-RBL-NCI/QuagmiR 
+    #cd QuagmiR && \
+    #conda env create -f environment.yml
+
+COPY Snakefile /opt2/QuagmiR/ 
 
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
