@@ -1,16 +1,21 @@
+
 // Author : Wilfried Guiblet
 
+
 nextflow.enable.dsl=2
+
 
 // Define input arguments
 params.MinLen = 18
 params.fastqdir = "fastq_files/*fastq"
 
+
 // Create a channel from the input path
 fastq_files = Channel.fromPath(params.fastqdir)
 
+
 process Trimm {
-  container 'wilfriedguiblet/isomir:v0.1'
+  container 'wilfriedguiblet/isomir:v0.2'
 
   input:
     val fastq_file
@@ -24,10 +29,16 @@ process Trimm {
   """
 }
 
+
+
 process sRNAprofiling {
-  container 'wilfriedguiblet/isomir:v0.1'
+
+  container 'wilfriedguiblet/isomir:v0.2'
 
   input:
+    val fastq_ready
+
+  output:
     val fastq_ready
 
   script:
@@ -49,7 +60,7 @@ process sRNAprofiling {
   echo 'mapping to mRNA.. mode -n 0 -l 20...'
   bowtie -n 0 -l 20 --best --norc /data2/NGS/index/human/refMrna --un /data2/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq --al /data2/analysis_files/'${fastq_ready}'_mRNA.fastq /data2/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA.fastq /data2/analysis_files/temp.txt
 
-echo 'mapping to refSeq.. mode -n 0 -l 20...'
+  echo 'mapping to refSeq.. mode -n 0 -l 20...'
   bowtie -n 0 -l 20 --best --norc /data2/NGS/index/human/ref_transcripts --un /data2/analysis_files/'${fastq_ready}'_others.fastq --al /data2/analysis_files/'${fastq_ready}'_others_ref.fastq /data2/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq /data2/analysis_files/temp.txt
 
   echo 'processing ${fastq_ready}...'
@@ -79,8 +90,44 @@ echo 'mapping to refSeq.. mode -n 0 -l 20...'
 
   printf "%s\t%d\t%d\t%d\t%d\t%d\t%d     \t%d\t%d\t%d\t%d\n" ${fastq_ready} \$total \$rRNA \$tRNA \$snoRNA \$miRNA \$mRNA \$others_ref \$mycoplasma \$unmappable \$hc_miRNA >> /data2/analysis_results/small_RNA_profile.txt
   """
+
 }
 
-workflow {
-  Trimm(fastq_files) | sRNAprofiling
+
+process RunQuagmiR {
+
+  container 'wilfriedguiblet/isomir:v0.2'
+
+  input:
+    val fastq_ready
+
+  script:
+  """
+  cp -r /opt2/QuagmiR/ /data2/
+  ln -s /data2/ready_files/${fastq_ready}.ready.fastq /data2/QuagmiR/data/
+  cd /data2/QuagmiR/
+  snakemake -j    
+  """
 }
+
+
+
+
+workflow {
+  Trimm(fastq_files) | sRNAprofiling | RunQuagmiR
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
