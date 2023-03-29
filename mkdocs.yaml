@@ -104,3 +104,7 @@ nav:
     - Description: DTEG/descript.md
     - Initialize: DTEG/init.md
     - Run: DTEG/run.md
+  - ISOMIR:
+    - Description: ISOMIR/descript.md
+    - Initialize: ISOMIR/init.md
+    - Run: ISOMIR/run.md
