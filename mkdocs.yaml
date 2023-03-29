@@ -5,9 +5,9 @@ site_description: >-
   A repository of Dockers and NextFlow workflows for the NCI-RBL
 
 # Repository
-repo_name: RBL-NCI/Dockers
-repo_url: https://github.com/RBL-NCI/Dockers
-edit_uri: https://github.com/RBL-NCI/Dockers/edit/main/docs/
+repo_name: NCI-RBL/Dockers
+repo_url: https://github.com/NCI-RBL/Dockers
+edit_uri: https://github.com/NCI-RBL/Dockers/edit/main/docs/
 
 # Copyright
 copyright: Copyright &copy; 2022 CCBR
