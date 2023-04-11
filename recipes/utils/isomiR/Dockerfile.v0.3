@@ -9,17 +9,20 @@ WORKDIR /opt2
 COPY adaptor_remove_lab_new8nt.c /opt2
 COPY adaptor_remove_illumina_v5.c /opt2
 COPY adaptor_remove_NEB_v2.c /opt2
-COPY RPM_summary.R /opt2
+COPY RPM_summary.R /opt2/QuagmiR/
 RUN chmod a+x /opt2/adaptor_remove_lab_new8nt.c
 RUN chmod a+x /opt2/adaptor_remove_illumina_v5.c
 RUN chmod a+x /opt2/adaptor_remove_NEB_v2.c
-RUN chmod a+x /opt2/RPM_summary.R
+RUN chmod a+x /opt2/QuagmiR/RPM_summary.R
 
-
-#RUN Rscript -e 'install.packages("dplyr")'
 
 ENV PATH=$CONDA_DIR/bin:$PATH 
-RUN conda install -c conda-forge r-dplyr
+RUN conda install -c conda-forge r-dplyr && \
+#    conda install -c conda-forge r-tidyr && \
+    conda install -c conda-forge r-tidyverse
+
+RUN Rscript -e 'install.packages("vctrs",repos = "http://cran.us.r-project.org")' && \
+    Rscript -e 'install.packages("tidyr",repos = "http://cran.us.r-project.org")'
 
 
 # Compile C scripts

@@ -1,4 +1,6 @@
 library(dplyr)
+library(tidyr)
+
 args = commandArgs(trailingOnly=TRUE)
 
 #read group_output.isomir.tsv from quagmiR
