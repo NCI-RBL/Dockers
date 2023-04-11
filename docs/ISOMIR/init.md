@@ -11,21 +11,19 @@ mkdir fastq_files
 
 ### Index
 
-You can copy the pre-made index folder in the working directory:
+You will need an Index directory for mapping. You can download this [Index](https://hpc.nih.gov/~RBL_NCI/Dockers/isomir/index.tar.gz) for hg38.
+Extract the downloaded directory :
 
 ```bash
-cp /mnt/rnabl-work/Guiblet/CCBRRBL10/index ./
+tar zxvf index.tar.gz
 ```
-
-You can create a new index as follow:
-TBA
 
 
 ### Scripts
 
 Download the following files in the working directory:
 
-- [DTEG_RBL.nf](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/DTEG_RBL.nf)
-- [DTEG_RBL.sh](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/DTEG_RBL.sh)
-- [nextflow.config](https://github.com/RBL-NCI/Dockers/blob/main/workflows/DTEG/nextflow.config)
-
+- [isomiR.nf](https://github.com/NCI-RBL/Dockers/blob/main/workflows/isomiR/isomiR.nf)
+- [isomiR.sh](https://github.com/NCI-RBL/Dockers/blob/main/workflows/isomiR/isomiR.sh)
+- [nextflow.config](https://github.com/NCI-RBL/Dockers/blob/main/workflows/isomiR/nextflow.config)
+- [motif-consensus.fa](https://github.com/NCI-RBL/Dockers/blob/main/workflows/isomiR/motif-consensus.fa)
