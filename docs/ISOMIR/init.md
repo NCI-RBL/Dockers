@@ -7,11 +7,13 @@ mkdir ISOMIR
 cd ISOMIR
 mkdir fastq_files
 ```
+Move all your experimental FastQ files in the fastq_files directory.
 
 
 ### Index
 
-You will need an Index directory for mapping. You can download this [Index](https://hpc.nih.gov/~RBL_NCI/Dockers/isomir/index.tar.gz) for hg38.
+You will need an Index directory for mapping to rRNA, tRNA, snoRNA, miRNA, transcriptome, and mycoplasma.
+You can download this [Index](https://hpc.nih.gov/~RBL_NCI/Dockers/isomir/index.tar.gz) for hg38.
 Extract the downloaded directory :
 
 ```bash
