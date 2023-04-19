@@ -13,6 +13,9 @@ params.outdir = "./"
 params.index = "hg38"
 params.consensus = ""
 
+params.sRNAprofiling = "Yes"
+params.QuagmiR = "Yes"
+
 // Create a channel from the input path
 fastq_files = Channel.fromPath(params.fastqdir)
 
@@ -29,7 +32,7 @@ process Trimm {
   script:
   if (params.trimmer == "Qiagen")
     """
-    /opt2/adaptor_remove_Qiagen_v3 ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq
+    /opt2/adaptor_remove_Qiagen_v3 ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq 2> /data2/${params.outdir}/log.txt
     """
 
   else if (params.trimmer == "Illumina")
@@ -46,6 +49,12 @@ process Trimm {
     """
     /opt2/adaptor_remove_lab_new8nt.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq
     """
+
+  else if (params.trimmer == "None")
+    """
+    cp /data2/fastq_files/${fastq_file.baseName}.fastq  /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq
+    """
+
 }
 
 
@@ -61,6 +70,8 @@ process sRNAprofiling {
     val fastq_ready
 
   script:
+
+  if (params.sRNAprofiling == "Yes")
   """
   echo 'processing ${fastq_ready}..'
   echo 'mapping to rRNA..mode -n 0 -l 20...'
@@ -106,6 +117,7 @@ process sRNAprofiling {
   let others_ref=\${others_ref}/4
   let mycoplasma=\${mycoplasma}/4
   let unmappable=\${unmappable}/4
+  let hc_miRNA=\${hc_miRNA}/4
 
   printf "%s\t%d\t%d\t%d\t%d\t%d\t%d     \t%d\t%d\t%d\t%d\n" ${fastq_ready} \$total \$rRNA \$tRNA \$snoRNA \$miRNA \$mRNA \$others_ref \$mycoplasma \$unmappable \$hc_miRNA >> /data2/${params.outdir}/analysis_results/small_RNA_profile.txt
   """
@@ -124,6 +136,8 @@ process RunQuagmiR {
     val fastq_ready
 
   script:
+
+
 
   if(params.consensus == '')
     """
@@ -162,8 +176,11 @@ process RPM_summary {
 
 
 workflow {
-  Trimm(fastq_files) | sRNAprofiling | RunQuagmiR | RPM_summary
 
+  if (params.sRNAprofiling == "Yes" && params.QuagmiR == "Yes") {Trimm(fastq_files) | sRNAprofiling | RunQuagmiR | RPM_summary}
+  if (params.sRNAprofiling == "No" && params.QuagmiR == "Yes") {Trimm(fastq_files)  | RunQuagmiR | RPM_summary}
+  if (params.sRNAprofiling == "Yes" && params.QuagmiR == "No") {Trimm(fastq_files) | sRNAprofiling}
+  if (params.sRNAprofiling == "No" && params.QuagmiR == "No") {Trimm(fastq_files)}
 
 }
 
