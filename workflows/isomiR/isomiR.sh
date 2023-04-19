@@ -17,6 +17,7 @@ project_name=$1
 trimmer=$2
 MinLen=$3
 Consensus=$4
+Index=$5
 procdir=./
 
 timestamp=$(date +%Y%m%d_%H%M)
@@ -51,5 +52,5 @@ printf "\ttotal\trRNA\ttRNA\tsnoRNA\tmiRNA\tmRNA\tothers_ref\tmycoplasma_H\tunma
 module load nextflow
 module load singularity
 
-nextflow run -c nextflow.config isomiR.nf --outdir ${project}/ --trimmer ${trimmer} --MinLen ${MinLen} --consensus ${Consensus}
+nextflow run -c nextflow.config isomiR.nf --outdir ${project}/ --trimmer ${trimmer} --MinLen ${MinLen} --consensus ${Consensus} --index ${Index}
 

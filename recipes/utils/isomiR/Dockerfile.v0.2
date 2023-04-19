@@ -81,6 +81,7 @@ RUN pip install pystan && \
 RUN git clone https://github.com/Gu-Lab-RBL-NCI/QuagmiR 
     #cd QuagmiR && \
     #conda env create -f environment.yml
+RUN rm -rf QuagmiR/.git
 
 COPY Snakefile /opt2/QuagmiR/ 
 

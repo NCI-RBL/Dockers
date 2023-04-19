@@ -10,7 +10,7 @@ params.MinLen = 18
 params.fastqdir = "fastq_files/*fastq"
 params.trimmer = "Qiagen"
 params.outdir = "./"
-params.index = "index"
+params.index = "hg38"
 params.consensus = ""
 
 // Create a channel from the input path
@@ -64,27 +64,27 @@ process sRNAprofiling {
   """
   echo 'processing ${fastq_ready}..'
   echo 'mapping to rRNA..mode -n 0 -l 20...'
-  bowtie -n 0 -l 20 --best --norc /data2/${params.index}/human/rRNA --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rRNA.fastq /data2/${params.outdir}/ready_files/'${fastq_ready}'.ready.fastq /data2/${params.outdir}/analysis_files/temp.txt
+  bowtie -n 0 -l 20 --best --norc /data2/index/${params.index}/rRNA --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rRNA.fastq /data2/${params.outdir}/ready_files/'${fastq_ready}'.ready.fastq /data2/${params.outdir}/analysis_files/temp.txt
 
   echo 'mapping to tRNA..mode -n 0 -l 20...'
-  bowtie -n 0 -l 20 --best --norc /data2/${params.index}/human/tRNA --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_tRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
+  bowtie -n 0 -l 20 --best --norc /data2/index/${params.index}/tRNA --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_tRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
 
   echo 'mapping to snoRNA..mode -n 0 -l 20...'
-  bowtie -n 0 -l 20 --best --norc /data2/${params.index}/human/snoRNA --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_snoRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
+  bowtie -n 0 -l 20 --best --norc /data2/index/${params.index}/snoRNA --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_snoRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
 
   echo 'mapping to miRNA_precusor.. n mode mismatch 0 seed length 20...'
-  bowtie -n 0 -l 20 --best --norc --sam /data2/${params.index}/miRNA_Aug_2018/hsa_hairpin_all_2018 --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_miRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_miRNA.sam
-  bowtie -n 0 -l 20 --best --norc --sam /data2/${params.index}/miRNA_Aug_2018/hsa_hairpin_hc_2018 --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_hc_miRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_miRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_hc_miRNA.sam
+  bowtie -n 0 -l 20 --best --norc --sam /data2/index/${params.index}/miRNA_hairpin_all --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_miRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_miRNA.sam
+  bowtie -n 0 -l 20 --best --norc --sam /data2/index/${params.index}/miRNA_hairpin_hc --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_hc_miRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_miRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_hc_miRNA.sam
 
   echo 'mapping to mRNA.. mode -n 0 -l 20...'
-  bowtie -n 0 -l 20 --best --norc /data2/${params.index}/human/refMrna --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_mRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
+  bowtie -n 0 -l 20 --best --norc /data2/index/${params.index}/refMrna --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_mRNA.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
 
   echo 'mapping to refSeq.. mode -n 0 -l 20...'
-  bowtie -n 0 -l 20 --best --norc /data2/${params.index}/human/ref_transcripts --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_others.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_others_ref.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
+  bowtie -n 0 -l 20 --best --norc /data2/index/${params.index}/ref_transcripts --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_others.fastq --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_others_ref.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_rm_rRNA_tRNA_snoRNA_miRNA_mRNA.fastq /data2/${params.outdir}/analysis_files/temp.txt
 
   echo 'processing ${fastq_ready}...'
   echo 'mapping to mycoplasma H..mode v1...'
-  bowtie -v 1 --sam /data2/${params.index}/Mycoplasma_hyo --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_unmappable.fastq  --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_mycoplasmaH.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_others.fastq  /data2/${params.outdir}/analysis_files/'${fastq_ready}'_mycoplasma.sam
+  bowtie -v 1 --sam /data2/index/mycoplasma/Mycoplasma_hyo --un /data2/${params.outdir}/analysis_files/'${fastq_ready}'_unmappable.fastq  --al /data2/${params.outdir}/analysis_files/'${fastq_ready}'_mycoplasmaH.fastq /data2/${params.outdir}/analysis_files/'${fastq_ready}'_others.fastq  /data2/${params.outdir}/analysis_files/'${fastq_ready}'_mycoplasma.sam
 
   total=`cat /data2/${params.outdir}/ready_files/${fastq_ready}.ready.fastq | wc -l`
   rRNA=`cat /data2/${params.outdir}/analysis_files/${fastq_ready}_rRNA.fastq | wc -l`
