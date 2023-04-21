@@ -32,22 +32,22 @@ process Trimm {
   script:
   if (params.trimmer == "Qiagen")
     """
-    /opt2/adaptor_remove_Qiagen_v3 ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq 2> /data2/${params.outdir}/log.txt
+    /opt2/adaptor_remove_Qiagen_v3 ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq 2> /data2/${params.outdir}/logs/${fastq_file.baseName}.txt
     """
 
   else if (params.trimmer == "Illumina")
     """
-    /opt2/adaptor_remove_illumina_v5.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq
+    /opt2/adaptor_remove_illumina_v5.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq 2> /data2/${params.outdir}/logs/${fastq_file.baseName}.txt
     """
 
   else if (params.trimmer == "NEB")
     """
-    /opt2/adaptor_remove_NEB_v2.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq
+    /opt2/adaptor_remove_NEB_v2.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq 2> /data2/${params.outdir}/logs/${fastq_file.baseName}.txt
     """
 
   else if (params.trimmer == "GuLab")
     """
-    /opt2/adaptor_remove_lab_new8nt.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq
+    /opt2/adaptor_remove_lab_new8nt.exe ${params.MinLen} < /data2/fastq_files/${fastq_file.baseName}.fastq > /data2/${params.outdir}/ready_files/${fastq_file.baseName}.ready.fastq 2> /data2/${params.outdir}/logs/${fastq_file.baseName}.txt
     """
 
   else if (params.trimmer == "None")
@@ -143,7 +143,7 @@ process RunQuagmiR {
     """
     cp -r /opt2/QuagmiR/ /data2/${params.outdir}/
     rm /data2/${params.outdir}/QuagmiR/data/sample.fastq
-    ln -s /data2/${params.outdir}/ready_files/${fastq_ready}.ready.fastq /data2/${params.outdir}/QuagmiR/data/
+    ln -s /data2/${params.outdir}/ready_files/*.ready.fastq /data2/${params.outdir}/QuagmiR/data/
     cd /data2/${params.outdir}/QuagmiR/
     snakemake -j
     """
@@ -153,7 +153,7 @@ process RunQuagmiR {
     cp -r /opt2/QuagmiR/ /data2/${params.outdir}/
     rm /data2/${params.outdir}/QuagmiR/data/sample.fastq
     cp /data2/${params.consensus} /data2/${params.outdir}/QuagmiR/motif-consensus.fa
-    ln -s /data2/${params.outdir}/ready_files/${fastq_ready}.ready.fastq /data2/${params.outdir}/QuagmiR/data/
+    ln -s /data2/${params.outdir}/ready_files/*.ready.fastq /data2/${params.outdir}/QuagmiR/data/
     cd /data2/${params.outdir}/QuagmiR/
     snakemake -j
     """
@@ -177,12 +177,13 @@ process RPM_summary {
 
 workflow {
 
-  if (params.sRNAprofiling == "Yes" && params.QuagmiR == "Yes") {Trimm(fastq_files) | sRNAprofiling | RunQuagmiR | RPM_summary}
-  if (params.sRNAprofiling == "No" && params.QuagmiR == "Yes") {Trimm(fastq_files)  | RunQuagmiR | RPM_summary}
+  if (params.sRNAprofiling == "Yes" && params.QuagmiR == "Yes") {Trimm(fastq_files) | sRNAprofiling | collect | RunQuagmiR | RPM_summary}
+  if (params.sRNAprofiling == "No" && params.QuagmiR == "Yes") {Trimm(fastq_files)  | collect | RunQuagmiR | RPM_summary}
   if (params.sRNAprofiling == "Yes" && params.QuagmiR == "No") {Trimm(fastq_files) | sRNAprofiling}
   if (params.sRNAprofiling == "No" && params.QuagmiR == "No") {Trimm(fastq_files)}
 
 }
+
 
 
 

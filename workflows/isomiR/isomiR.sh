@@ -33,7 +33,7 @@ mkdir $project
 mkdir ${project}/ready_files
 mkdir ${project}/analysis_files
 mkdir ${project}/analysis_results
-
+mkdir  ${project}/logs
 
 #path=`pwd`/${project}
 
@@ -58,5 +58,5 @@ module load nextflow
 module load singularity
 
 #nextflow run -c nextflow.config isomiR.nf --outdir ${project}/ --trimmer ${trimmer} --MinLen ${MinLen} --consensus ${Consensus} --index ${Index}
-nextflow run isomiR.nf -c nextflow.config -with-dag --outdir ${project}/ ${Arguments} 
+nextflow run isomiR.nf -c nextflow.config --outdir ${project}/ ${Arguments} 
 
