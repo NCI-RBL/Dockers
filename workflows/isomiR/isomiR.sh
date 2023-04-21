@@ -58,5 +58,9 @@ module load nextflow
 module load singularity
 
 #nextflow run -c nextflow.config isomiR.nf --outdir ${project}/ --trimmer ${trimmer} --MinLen ${MinLen} --consensus ${Consensus} --index ${Index}
-nextflow run isomiR.nf -c nextflow.config --outdir ${project}/ ${Arguments} 
+nextflow run isomiR.nf -c nextflow.config \
+                       --outdir ${project}/ ${Arguments} \
+                       -with-report ${project}/Report.html \
+                       -with-dag ${project}/Flowchart.html \
+                       -with-timeline ${project}/Timeline.html
 
