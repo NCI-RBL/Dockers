@@ -34,7 +34,7 @@ create_unique = Channel.fromList(['unique'])
 
 
 params.workdir = '' // Working directory. Needs to be transfered to yaml.
-params.threads = 1 // Threads to use for multithreading. Use carefully. Needs to be transfered to yaml.
+params.threads = 4 // Threads to use for multithreading. Use carefully. Needs to be transfered to yaml.
 params.tempdir = './' // Temp directory. 
 
 // Convert rRNA selection and splice junction selection from Y/N to TRUE/FALSE
@@ -220,59 +220,95 @@ process Star {
         """
         set -exo pipefail
 
-
+        
         # STAR cannot handle sorting large files - allow samtools to sort output files
-        STAR \
-        --runMode alignReads \
-        --genomeDir !{params.s_index} \
-        --sjdbGTFfile !{params.s_gtf} \
-        --readFilesCommand zcat \
-        --readFilesIn !{params.workdir}/01_preprocess/01_fastq/!{file}.fastq.gz' \
-        --outFileNamePrefix !{params.workdir}/01_preprocess/07_rscripts/ \
-        --outReadsUnmapped Fastx \
-        --outSAMtype BAM Unsorted \
-        --alignEndsType !{params.s_atype} \
-        --alignIntronMax !{params.s_intron} \
-        --alignSJDBoverhangMin !{params.s_sjdb} \
-        --alignSJoverhangMin !{params.s_asj} \
-        --alignTranscriptsPerReadNmax !{params.s_transc} \
-        --alignWindowsPerReadNmax !{params.s_windows} \
-        --limitBAMsortRAM !{params.star_bam_limit} \
-        --limitOutSJcollapsed !{params.s_sjcol} \
-        --outFilterMatchNmin !{params.s_match} \
-        --outFilterMatchNminOverLread !{params.s_readmatch} \
-        --outFilterMismatchNmax !{params.s_mismatch} \
-        --outFilterMismatchNoverReadLmax !{params.s_readmm} \
-        --outFilterMultimapNmax !{params.s_fmm} \
-        --outFilterMultimapScoreRange !{params.s_mmscore} \
-        --outFilterScoreMin !{params.s_score} \
-        --outFilterType !{params.s_ftype} \
-        --outSAMattributes !{params.s_att} \
-        --outSAMunmapped !{params.s_unmap} \
-        --outSJfilterCountTotalMin !{params.s_sjmin} \
-        --outSJfilterOverhangMin !{params.s_overhang} \
-        --outSJfilterReads !{params.s_sjreads} \
-        --seedMultimapNmax !{params.s_smm} \
-        --seedNoneLociPerWindow !{params.s_loci} \
-        --seedPerReadNmax !{params.s_read} \
-        --seedPerWindowNmax !{params.s_wind} \
-        --sjdbScore !{params.s_sj} \
-        --winAnchorMultimapNmax !{params.s_anchor} \
+        STAR \\
+        --runThreadN !{params.threads} \\
+        --runMode alignReads \\
+        --genomeDir !{params.s_index} \\
+        --sjdbGTFfile !{params.s_gtf} \\
+        --readFilesCommand zcat \\
+        --readFilesIn !{params.workdir}/01_preprocess/01_fastq/!{file.SimpleName}.fastq.gz \\
+        --outFileNamePrefix !{params.workdir}/01_preprocess/!{file.SimpleName}_ \\
+        --outReadsUnmapped Fastx \\
+        --outSAMtype BAM Unsorted \\
+        --alignEndsType !{params.s_atype} \\
+        --alignIntronMax !{params.s_intron} \\
+        --alignSJDBoverhangMin !{params.s_sjdb} \\
+        --alignSJoverhangMin !{params.s_asj} \\
+        --alignTranscriptsPerReadNmax !{params.s_transc} \\
+        --alignWindowsPerReadNmax !{params.s_windows} \\
+        --limitBAMsortRAM !{params.star_bam_limit} \\
+        --limitOutSJcollapsed !{params.s_sjcol} \\
+        --outFilterMatchNmin !{params.s_match} \\
+        --outFilterMatchNminOverLread !{params.s_readmatch} \\
+        --outFilterMismatchNmax !{params.s_mismatch} \\
+        --outFilterMismatchNoverReadLmax !{params.s_readmm} \\
+        --outFilterMultimapNmax !{params.s_fmm} \\
+        --outFilterMultimapScoreRange !{params.s_mmscore} \\
+        --outFilterScoreMin !{params.s_score} \\
+        --outFilterType !{params.s_ftype} \\
+        --outSAMattributes !{params.s_att} \\
+        --outSAMunmapped !{params.s_unmap} \\
+        --outSJfilterCountTotalMin !{params.s_sjmin} \\
+        --outSJfilterOverhangMin !{params.s_overhang} \\
+        --outSJfilterReads !{params.s_sjreads} \\
+        --seedMultimapNmax !{params.s_smm} \\
+        --seedNoneLociPerWindow !{params.s_loci} \\
+        --seedPerReadNmax !{params.s_read} \\
+        --seedPerWindowNmax !{params.s_wind} \\
+        --sjdbScore !{params.s_sj} \\
+        --winAnchorMultimapNmax !{params.s_anchor} \\
         --quantMode !{params.s_quantmod}
 
         # sort file
-        samtools sort -m 80G -T !{params.workdir}/01_preprocess/07_rscripts/ !{params.workdir}/01_preprocess/07_rscripts/!{file}_Aligned.out.bam -o !{params.workdir}/01_preprocess/07_rscripts/!{file}_Aligned.sortedByCoord.out.bam
+        samtools sort -m 80G -T !{params.workdir}/01_preprocess/ !{params.workdir}/01_preprocess/!{file.SimpleName}_Aligned.out.bam -o !{params.workdir}/01_preprocess/!{file.SimpleName}_Aligned.sortedByCoord.out.bam
 
         # move STAR files and final log file to output
-        mv !{params.workdir}/01_preprocess/07_rscripts/!{file}_Aligned.sortedByCoord.out.bam !{params.workdir}/01_preprocess/02_alignment/!{file}_Aligned.sortedByCoord.out.bam
-        mv !{params.workdir}/01_preprocess/07_rscripts/!{file}_Log.final.out !{params.workdir}/log/STAR/!{file}.log'
+        mv !{params.workdir}/01_preprocess/!{file.SimpleName}_Aligned.sortedByCoord.out.bam !{params.workdir}/01_preprocess/02_alignment/!{file.SimpleName}_Aligned.sortedByCoord.out.bam
+        mv !{params.workdir}/01_preprocess/!{file.SimpleName}_Log.final.out !{params.workdir}/log/STAR/!{file.SimpleName}.log
         
         # move mates to unmapped file
-        touch !{params.workdir}/01_preprocess/02_alignment/01_unmapped/!{file}.unmapped.out
-        for f in !{params.workdir}/01_preprocess/07_rscripts/!{file}_Unmapped.out.mate*; do cat $f >> !{params.workdir}/01_preprocess/02_alignment/01_unmapped/!{file}.unmapped.out; done
+        touch !{params.workdir}/01_preprocess/02_alignment/01_unmapped/!{file.SimpleName}.unmapped.out
+        for f in !{params.workdir}/01_preprocess/!{file.SimpleName}_Unmapped.out.mate*; do cat \$f >> !{params.workdir}/01_preprocess/02_alignment/01_unmapped/!{file.SimpleName}.unmapped.out; done
         """
 
 }
+
+process Index_Starts:
+    """
+    sort, index files
+    run samstats on files
+    """
+
+    input:
+        val file
+
+    output:
+        val file
+    
+    shell:
+        """
+        set -exo pipefail
+        
+        # Index
+        cp !{params.workdir}/01_preprocess/02_alignment/!{file}_Aligned.sortedByCoord.out.bam !{params.workdir}/02_bam/01_merged/!{file}.si.bam
+        samtools index -@ !{params.threads} !{params.workdir}/02_bam/01_merged/!{file}.si.bam;
+        
+        # Run samstats
+        samtools stats --threads !{params.threads} !{params.workdir}/02_bam/01_merged/!{file}.si.bam > !{params.workdir}/00_QC/02_SamStats/!{file}_samstats.txt'
+        """
+
+
+// rule check_read_counts:
+
+// rule multiqc:
+
+// rule qc_troubleshoot:
+
+// rule dedup:
+
+
 
 
 process CTK_Peak_Calling {
@@ -676,7 +712,8 @@ process Annotation_Report {
 
 workflow {
     //Create_Project_Annotations(create_unique)
-    //Star(bamfiles)
+    Star(bamfiles)
+    Index_Starts(Star.out)
     //Create_Safs(bedfiles)
     //Feature_Counts(Create_Safs.out)
     //Peak_Junction(Feature_Counts.out)
@@ -685,5 +722,5 @@ workflow {
     //Peak_RMSK(Peak_ExonIntron.out)
     //Peak_Process(Peak_RMSK.out)
     //Annotation_Report(Peak_Process.out)
-    Annotation_Report(bedfiles)
+    //Annotation_Report(bedfiles)
 }
