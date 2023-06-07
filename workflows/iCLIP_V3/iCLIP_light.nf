@@ -34,7 +34,7 @@ create_unique = Channel.fromList(['unique'])
 
 
 params.workdir = '' // Working directory. Needs to be transfered to yaml.
-params.threads = 4 // Threads to use for multithreading. Use carefully. Needs to be transfered to yaml.
+params.threads = '4' // Threads to use for multithreading. Use carefully. Needs to be transfered to yaml.
 params.tempdir = './' // Temp directory. 
 
 // Convert rRNA selection and splice junction selection from Y/N to TRUE/FALSE
@@ -84,6 +84,26 @@ params.s_anchor = params.winAnchorMultimapNmax
 params.s_quantmod = params.quantmod
 
 params.a_config = "${params.workdir}/config/annotation_config.txt"
+
+params.count_threshold = params.min_reads_mapped
+
+
+if( params.count_threshold > 1) {
+    println "Count_threshold must be a decimal value, representing a percentage."
+}
+
+
+// determine which umi separator to use
+if(params.multiplexflag == 'Y') {
+    // demultiplexing ades rbc: to all demux files;
+    params.umi_sep = "rbc:"}
+else{
+    // external demux uses an _
+    params.umi_sep = params.umiSeparator}
+
+
+
+
 
 // ************* End of parameter importation *************
 
@@ -275,7 +295,7 @@ process Star {
 
 }
 
-process Index_Starts:
+process Index_Starts{
     """
     sort, index files
     run samstats on files
@@ -296,20 +316,129 @@ process Index_Starts:
         samtools index -@ !{params.threads} !{params.workdir}/02_bam/01_merged/!{file}.si.bam;
         
         # Run samstats
-        samtools stats --threads !{params.threads} !{params.workdir}/02_bam/01_merged/!{file}.si.bam > !{params.workdir}/00_QC/02_SamStats/!{file}_samstats.txt'
+        samtools stats --threads !{params.threads} !{params.workdir}/02_bam/01_merged/!{file}.si.bam > !{params.workdir}/00_QC/02_SamStats/!{file}_samstats.txt
+        """
+
+}
+
+
+process Check_ReadCounts {
+    """
+    In a recent project the incorrect species was selected and nearly 80% of all reads in all samples (N=6) were not mapped. 
+    Rather than continuing with this type of potential low-quality sample, the pipeline should stop.
+
+    http://www.htslib.org/doc/samtools-stats.html
+    """
+
+    input:
+        val file
+
+    output:
+        val file
+
+
+    shell:
+        """
+        # set fail count
+        fail=0
+
+        # create output file
+        #if [[ -f !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt ]]; then rm !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt ; fi 
+        #touch !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt
+
+        for f in !{params.workdir}/00_QC/02_SamStats/!{file}_samstats.txt; do
+            # check samstats file to determine number of reads and reads mapped
+            raw_count=`cat \$f | grep "raw total sequences" | awk -F"\t" '{{print \$3}}'`
+            mapped_count=`cat \$f | grep "reads mapped:" | awk -F"\t" '{{print \$3}}'`
+            found_percentage=\$((\$mapped_count / \$raw_count))
+
+            # check the count against the set count_threshold, if counts found are lower than expected, fail
+            fail=0
+            if [ 1 -eq "\$(echo "\${{found_percentage}} < !{params.count_threshold}" | bc)" ]; then
+                flag="sample failed"
+                fail=\$((fail + 1))
+            else
+                flag="sample passed"
+            fi
+            
+            # put data into output
+            echo "\$f\t\$found_percentage\t\$flag" >> !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt
+        done
+
+        # create output file
+if [ 1 -eq "\$(echo "\${{fail}} > 0" | bc)" ]; then
+            echo "Check sample log !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt to review what sample(s) failed" > !{params.workdir}/00_QC/02_SamStats/qc_read_count_check_fail.txt
+        else
+            touch !{params.workdir}/00_QC/02_SamStats/qc_read_count_check_pass.txt
+        fi
         """
 
 
-// rule check_read_counts:
+}
+
+
+
 
 // rule multiqc:
 
 // rule qc_troubleshoot:
 
-// rule dedup:
 
 
+process DeDup {
+    """
+    deduplicate reads
+    sort,index dedup.bam file
+    get header of dedup file
+    """
 
+    input:
+        val file
+
+    output:
+        val file
+
+    shell:
+        """
+        set -exo pipefail
+ 
+        # Run UMI Tools Deduplication
+        echo "Using the following UMI seperator: !{params.umi_sep}"
+        umi_tools dedup \\
+            -I !{params.workdir}/02_bam/01_merged/!{file}.si.bam \\
+            --method unique \\
+            --multimapping-detection-method=NH \\
+            --umi-separator=!{params.umi_sep} \\
+            -S !{params.workdir}/temp/!{file}.unmasked.bam \\
+            --log2stderr;
+        
+        # Sort and Index
+        samtools sort --threads !{params.threads} -m 10G -T !{params.workdir}/temp/ \\
+            !{params.workdir}/temp/!{file}.unmasked.bam \\
+            -o !{params.workdir}/02_bam/02_dedup/!{file}.dedup.si.bam;
+        samtools index -@ !{params.threads} !{params.workdir}/02_bam/02_dedup/!{file}.dedup.si.bam;
+        """
+
+}
+
+process Remove_Spliced_Reads {
+    """
+    Remove spliced reads from genome-wide alignment.
+    Spliced reads create spliced peaks and will be dealt with by mapping against the transcriptome.
+    """
+
+    input:
+        val file
+
+    output:
+        val file
+
+    shell:
+        """
+        samtools view -h !{params.workdir}/02_bam/02_dedup/!{file}.dedup.si.bam | awk '\$0 ~ /^@/ || \$5 !~ /N/' | samtools view -b > !{params.workdir}/02_bam/02_dedup/!{file}.filtered.bam
+        samtools index -@ !{params.threads} !{params.workdir}/02_bam/02_dedup/!{file}.filtered.bam
+        """
+}
 
 process CTK_Peak_Calling {
     """
@@ -328,22 +457,20 @@ process CTK_Peak_Calling {
 
         """
         export PERL5LIB=/opt/conda/lib/czplib
-        bedtools bamtobed -i /data2/bamfiles/!{file}.bam > /data2/bedfiles/!{file}.bed
+        bedtools bamtobed -i /data2/02_bam/02_dedup/!{file}.filtered.bam > /data2/03_peaks/01_bed/!{file}.bed
 
         /opt/conda/lib/ctk/tag2peak.pl \
         -big -ss \
         -p 0.05 --multi-test\
         --valley-seeking \
         --valley-depth 0.9 \
-        /data2/bedfiles/!{file}.bed /data2/peaks/!{file}.peaks.bed \
-        --out-boundary /data2/peaks/!{file}.peaks.boundary.bed \
-        --out-half-PH /data2/peaks/!{file}.peaks.halfPH.bed \
+        /data2/03_peaks/01_bed/!{file}.bed /data2/03_peaks/01_bed/!{file}.peaks.bed \
+        --out-boundary /data2/03_peaks/01_bed/!{file}.peaks.boundary.bed \
+        --out-half-PH /data2/03_peaks/01_bed/!{file}.peaks.halfPH.bed \
         --multi-test
         """
 
 }
-
-
 
 process Create_Safs {
     """
@@ -714,6 +841,10 @@ workflow {
     //Create_Project_Annotations(create_unique)
     Star(bamfiles)
     Index_Starts(Star.out)
+    Check_ReadCounts(Index_Starts.out)
+    DeDup(Check_ReadCounts.out)
+    Remove_Spliced_Reads(DeDup.out)
+    CTK_Peak_Calling(Remove_Spliced_Reads.out)
     //Create_Safs(bedfiles)
     //Feature_Counts(Create_Safs.out)
     //Peak_Junction(Feature_Counts.out)
