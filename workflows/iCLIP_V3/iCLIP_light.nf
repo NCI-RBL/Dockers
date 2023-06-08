@@ -87,6 +87,8 @@ params.a_config = "${params.workdir}/config/annotation_config.txt"
 
 params.count_threshold = params.min_reads_mapped
 
+params.manorm_w = params.MANormWidth
+params.manorm_d = params.MNormDistance
 
 if( params.count_threshold > 1) {
     println "Count_threshold must be a decimal value, representing a percentage."
@@ -472,6 +474,56 @@ process CTK_Peak_Calling {
 
 }
 
+
+MANORM_constrasts = Channel.of( ['YKO_Clip3', 'Ro_Clip3'], ['Y1KO_Clip3', 'Ro_Clip3'], ['Y3KO_Clip3', 'Ro_Clip3'] ) 
+
+process MANORM_analysis {
+
+    input:
+       tuple val(sample), val(background)
+
+    output:
+        val file
+
+    shell:
+        """
+        manorm \\
+            --p1 "!{params.workdir}/03_peaks/01_bed/!{sample}.peaks.boundary.bed" \\
+            --p2 "!{params.workdir}/03_peaks/01_bed/!{background}.peaks.boundary.bed" \\
+            --r1 "!{params.workdir}/03_peaks/01_bed/!{sample}.bed" \\
+            --r2 "!{params.workdir}/03_peaks/01_bed/!{background}.bed" \\
+            --s1 0 \\
+            --s2 0 \\
+            -p 1 \\
+            -m 0 \\
+            -w !{params.manorm_w} \\
+            -d !{params.manorm_d} \\
+            -n 10000 \\
+            -s \\
+            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background} \\
+            --name1 !{sample} \\
+            --name2 !{background}
+        
+        # rename MANORM final output file
+        #mv {params.base}{wildcards.group_id}_all_MAvalues.xls {output.mavals}
+
+        # rename individual file names for each sample
+        #mv {params.base}{params.gid_1}_MAvalues.xls {params.base}{params.gid_1}_{params.peak_id}readPeaks_MAvalues.xls
+        #mv {params.base}{params.gid_2}_MAvalues.xls {params.base}{params.gid_2}_{params.peak_id}readPeaks_MAvalues.xls
+
+        # mv folders of figures, filters, tracks to new location
+        # remove folders if they already exist
+        #if [[ -d {params.base}output_figures_{params.peak_id}readPeaks ]]; then rm -r {params.base}output_figures_{params.peak_id}readPeaks; fi
+        #if [[ -d {params.base}output_filters_{params.peak_id}readPeaks ]]; then rm -r {params.base}output_filters_{params.peak_id}readPeaks; fi
+        #if [[ -d {params.base}output_tracks_{params.peak_id}readPeaks ]]; then rm -r {params.base}output_tracks_{params.peak_id}readPeaks; fi
+        #mv {params.base}output_figures {params.base}output_figures_{params.peak_id}readPeaks
+        #mv {params.base}output_filters {params.base}output_filters_{params.peak_id}readPeaks
+        #mv {params.base}output_tracks {params.base}output_tracks_{params.peak_id}readPeaks
+        """    
+
+}
+
+
 process Create_Safs {
     """
     Reformat BED into SAF.
@@ -642,8 +694,8 @@ process Peak_Transcripts {
     shell:
         """
         Rscript !{params.workdir}/workflow/scripts/05_Anno_Transcript.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions.R \\
-            #--rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
+            #--rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions.R \\
+            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
             --peak_type !{params.peakid} \\
             --anno_anchor !{params.AnnoAnchor} \\
             --read_depth !{params.mincount} \\
@@ -660,8 +712,8 @@ process Peak_Transcripts {
             --anno_strand "SameStrand"
 
         Rscript !{params.workdir}/workflow/scripts/05_Anno_Transcript.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions.R \\
-            #--rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
+            #--rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions.R \\
+            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
             --peak_type !{params.peakid} \\
             --anno_anchor !{params.AnnoAnchor} \\
             --read_depth !{params.mincount} \\
@@ -839,12 +891,13 @@ process Annotation_Report {
 
 workflow {
     //Create_Project_Annotations(create_unique)
-    Star(bamfiles)
-    Index_Starts(Star.out)
-    Check_ReadCounts(Index_Starts.out)
-    DeDup(Check_ReadCounts.out)
-    Remove_Spliced_Reads(DeDup.out)
-    CTK_Peak_Calling(Remove_Spliced_Reads.out)
+    //Star(bamfiles)
+    //Index_Starts(Star.out)
+    //Check_ReadCounts(Index_Starts.out)
+    //DeDup(Check_ReadCounts.out)
+    //Remove_Spliced_Reads(DeDup.out)
+    //CTK_Peak_Calling(Remove_Spliced_Reads.out)
+    MANORM_analysis(MANORM_constrasts)
     //Create_Safs(bedfiles)
     //Feature_Counts(Create_Safs.out)
     //Peak_Junction(Feature_Counts.out)
