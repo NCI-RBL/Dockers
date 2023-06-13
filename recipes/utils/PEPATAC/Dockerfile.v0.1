@@ -1,0 +1,50 @@
+FROM nciccbr/ccbr_ubuntu_base_20.04:v2.1
+
+ENV TAG="v0.1"
+
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# Install CTK
+RUN conda config --env --append channels conda-forge && \
+    conda config --env --append channels bioconda && \
+    conda install --yes -c chaolinzhanglab ctk
+
+#    conda install -c bioconda fastx_toolkit && \
+#    conda install -c bioconda cutadapt && \
+#    conda install -c bioconda bwa && \
+#    conda install -c bioconda samtools &&\
+#    conda install -c bioconda perl-math-cdf
+
+#RUN git clone https://github.com/chaolinzhanglab/czplib.git && \
+#    git clone https://github.com/chaolinzhanglab/ctk.git
+
+#RUN mv czplib /opt2/ && \
+#    export PERL5LIB=/opt2/czplib
+
+#RUN  mv ctk /opt2/ 
+#COPY ctk_custom/tag2peak.pl /opt2/ctk/ 
+#RUN  chmod a+rX /opt2/ctk
+
+
+#RUN Rscript -e 'install.packages("BiocManager")'
+#RUN Rscript -e 'install.packages("devtools")'
+#RUN Rscript -e 'devtools::install_github("kathrynrozengagnon/CLIPflexR")'
+#RUN Rscript -e 'devtools::install_github("RockefellerUniversity/Herper")'
+#RUN Rscript -e 'Herper::install_CondaSysReqs("CLIPflexR", SysReqsAsJSON = FALSE)'
+#RUN Rscript -e 'CLIPflexR::install_ctk()'
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
