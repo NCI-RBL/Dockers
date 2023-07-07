@@ -1,0 +1,111 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+# possible entries of the config file and which type they should be
+properties:
+  sourceDir:
+    type: string
+    description: /path/to/iCLIP/dir
+  outputDir:
+    type: string
+    description: /path/to/output/dir
+  fastqDir:
+    type: string
+    description: /path/to/fastq/files
+  sampleManifest:
+    type: string
+    description: /path/to/sample/manifest
+  multiplexManifest:
+    type: string
+    description: /path/to/multiplex/manifest
+  contrastManifest:
+    type: string
+    description: /path/to/contrast/manifest
+  multiplexflag:
+    types: string
+    enum: ["Y","N","y","n"]
+    description: determine whether or not samples are multiplexed
+  mismatch:
+    types: number
+    enum: [1,2,3]
+    description: number of bp mismatches allowed in demultiplexing
+  reference:
+    type: string
+    enum: ["hg38","mm10"]
+    description: reference organism
+  filterlength: 
+    types: number
+    description: minimum read length to include in analysis, any int greater than 20
+  phredQuality: 
+    types: number
+    description: The minimum quality score for 3 prime end trimming
+  includerRNA:
+    type: string
+    enum: ["Y","N","y","n"]
+    description: if spliceaware, include refseq rRNA's in annotations
+  splicejunction: 
+    type: string
+    enum: ["Y","N","y","n"]
+    description: if spliceaware Y, include splice junctions in peak calls for DE_METHOD MANORM or DIFFBIND
+  AnnoAnchor:
+    type: string
+    enum: ["max_MM","max_total","5prime"]
+    description: Annotations for spliced peaks will be based on either 5` most region or region with max reads based on Count_FracMM (max_mm) or total reads (max_total)
+  mincount:
+    type: number
+    description: minimum number of values to count as a 'peak'
+  ntmerge:
+    type: number
+    description: minimum distance of nucleotides to merge peaks
+  peakid:
+    type: string
+    enum: ["all","ALL","unique","UNIQUE"]
+    description: report peaks for unique peaks only or unique and fractional mm
+  DEmethod:
+    type: string
+    enum: ["MANORM","manorm","none","NONE", "DIFFBIND","diffbind"]
+    description: DE method option  
+  sampleoverlap:
+    type: number
+    description: if DEmethod DIFFBIND, minimum number of samples a peak must be found in to be counted 
+  pval: 
+    type: number
+    description: if DEmethod, pval cutoff for significance
+  fc:
+    type: number
+    description: if DEmethod, fold change cut off for significance
+  containerDir:
+    type: string
+    description: /path/to/container/sif/files
+  fastq_val:
+    type: string
+    description: /path/to/fastQValidator
+
+# entries that have to be in the config file for successful validation
+required:
+  - sourceDir
+  - outputDir
+  - fastqDir
+  - sampleManifest
+  - multiplexManifest
+  - contrastManifest
+  - multiplexflag
+  - mismatch
+  - reference
+  - filterlength
+  - phredQuality
+  - includerRNA
+  - splicejunction
+  - AnnoAnchor
+  - mincount
+  - ntmerge
+  - peakid
+  - DEmethod
+  - sampleoverlap
+  - pval
+  - fc
+  - containerDir
+  - fastq_val

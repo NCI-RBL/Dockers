@@ -18,17 +18,11 @@ located at: TBD
 // Necessary for syntax
 nextflow.enable.dsl=2
 
-
 // Create channels from the input paths
-//bamfiles = Channel.fromPath(params.bamfiles)
 
-//rawfiles = Channel.fromPath('rawfiles/toy*.fastq.gz').view { "value: $it" }
 rawfiles_ch = Channel.fromList(params.rawfilesnames)//.view { "value: $it" }
 samplefiles_ch = Channel.fromList(params.samplenames)//.view { "value: $it" }
-
-//fastqfiles = Channel.fromPath('${params.workdir}/01_preprocess/01_fastq/*.fastq.gz')
-//bamfiles = Channel.fromPath('bamfiles/*bam')
-//bedfiles = Channel.fromPath('03_peaks/01_bed/*bed')
+contrasts_ch = Channel.fromList(params.contrasts)//.view { "value: $it" }
 
 // Create a channel with a unique value. Useful for processes that do not iterate through multiple samples.
 unique_ch = Channel.fromList(['unique'])
@@ -43,8 +37,8 @@ params.threads = '4' // Threads to use for multithreading. Use carefully. Needs 
 // Convert rRNA selection and splice junction selection from Y/N to TRUE/FALSE
 if (params.include_rRNA=="Y") {params.rrna_flag = "TRUE"}
 else {params.rrna_flag = "FALSE"}
-if (params.splicejunction=="Y") {params.sp_junc = "TRUE"}
-else {params.sp_junc = "FALSE"}
+//if (params.splicejunction=="Y") {params.sp_junc = "TRUE"}
+//else {params.sp_junc = "FALSE"}
 //
 
 
@@ -78,6 +72,7 @@ else{
 process Create_Project_Annotations {
     """
     Generate annotation table once per project.
+    Generate BED files of annotations.
     """
 
     //container 'wilfriedguiblet/iclip:v3.0' // Use a Docker container
@@ -102,6 +97,13 @@ process Create_Project_Annotations {
           --custom_path !{params."${params.reference}".additionalannopath} \\
           --out_dir !{params.workdir}/04_annotation/01_project/ \\
           --reftable_path !{params.a_config} 
+
+        awk -v OFS='\t' '(NR>1) {print \$6, \$7, \$8, \$11, \$12, \$10, \$13}' !{params."${params.reference}".rmskpath} \\
+             > !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed
+        awk -v OFS='\t' '(NR>1) {print \$1, \$4, \$5, \$2, \$6, \$7, \$3, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16,\\
+           \$17, \$18, \$19, \$20, \$21, \$22, \$23, \$24, \$25}' !{params."${params.reference}".gencodepath} \\
+             > !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed
+        cp !{params."${params.reference}".intronpath} !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed
         """
 }
 
@@ -145,14 +147,14 @@ process QC_Barcode {
         gunzip -c !{params.rawdir}/!{rawfile}.fastq.gz \\
             | awk 'NR%4==2 {{print substr(\$0, !{params.qc_barcode.start_pos}, !{params.qc_barcode.barcode_length});}}' \\
             | LC_ALL=C sort --buffer-size=!{params.qc_barcode.memory} --parallel=!{params.qc_barcode.threads} --temporary-directory='!{params.tempdir}' -n \\
-            | uniq -c > !{params.workdir}/00_QC/01_Barcodes/!{rawfile}.test_barcode_counts.txt;        
+            | uniq -c > !{params.workdir}/00_QC/01_Barcodes/!{rawfile}_barcode_counts.txt;        
 
         Rscript !{params.workdir}/workflow/scripts/02_barcode_qc.R \\
             --sample_manifest !{params.manifests.samples} \\
             --multiplex_manifest !{params.manifests.multiplex} \\
             --barcode_input !{params.workdir}/00_QC/01_Barcodes/!{rawfile}_barcode_counts.txt \\
             --mismatch !{params.mismatch} \\
-            --mpid clip3 \\
+            --mpid !{params.qc_barcode.mpid} \\
             --output_dir !{params.workdir}/00_QC/01_Barcodes/ \\
             --qc_dir !{params.workdir}/00_QC/01_Barcodes/
         """
@@ -347,10 +349,109 @@ if [ 1 -eq "\$(echo "\${{fail}} > 0" | bc)" ]; then
 
 }
 
+process FastQC {
+
+    input:
+        tuple val(rawfile), val(samplefile)
+
+    output:
+        val samplefile
+
+    shell:
+        """
+         set -exo pipefail
+
+        # run FASTQC
+        fastqc !{params.workdir}/01_preprocess/01_fastq/ultraplex_demux_!{samplefile}.fastq.gz \\
+               -o !{params.workdir}/00_QC/03_MultiQC/
+        """
+}
+
+process QC_Screen_Validator {
+    """
+    #fastq screen
+    - this will align first to human, mouse, bacteria then will align to rRNA
+    must run fastq_screen as two separate commands - multiqc will merge values of rRNA with human/mouse
+    http://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/_build/html/index.html
+    - fastq validator
+    Quality-control step to ensure the input FastQC files are not corrupted or
+    incomplete prior to running the entire workflow.
+    @Input:
+        Raw FastQ file (scatter)
+    @Output:
+        Log file containing any warnings or errors on file
+    """
+
+    input:
+        val samplefile
+
+    output:
+        val "QC_Done"
+
+    shell:
+        """
+        set -exo pipefail
+
+        # Gzip input files
+        gunzip -c !{params.workdir}/01_preprocess/01_fastq/ultraplex_demux_!{samplefile}.fastq.gz \\
+         > !{params.workdir}/temp/!{samplefile}.fastq;
+        
+        # Run FastQ Screen
+        fastq_screen --conf !{params.workdir}/config/fqscreen_species_config.conf \\
+            --outdir !{params.workdir}/00_QC/04_QC_ScreenSpecies \\
+            --threads !{params.QC_Screen_Validator.threads} \\
+            --subset 1000000 \\
+            --aligner bowtie2 \\
+            --force \\
+            !{params.workdir}/temp/!{samplefile}.fastq ;
+        fastq_screen --conf !{params.workdir}/config/fqscreen_rrna_config.conf \\
+            --outdir !{params.workdir}/00_QC/05_QC_ScreenRRNA \\
+            --threads !{params.QC_Screen_Validator.threads} \\
+            --subset 1000000 \\
+            --aligner bowtie2 \\
+            --force \\
+            !{params.workdir}/temp/!{samplefile}.fastq ;
+        
+        # Remove tmp gzipped file
+        rm !{params.workdir}/temp/!{samplefile}.fastq
+        
+        # Run FastQ Validator
+        !{params.fastq_val} \\
+            --disableSeqIDCheck \\
+            --noeof \\
+            --printableErrors 100000000 \\
+            --baseComposition \\
+            --avgQual \\
+            --file !{params.workdir}/01_preprocess/01_fastq/ultraplex_demux_!{samplefile}.fastq.gz \\
+                > !{params.workdir}/00_QC/!{samplefile}.validated.fastq.log ;
+        """
+}
 
 
+process MultiQC {
+    """
+    merges FastQC reports for pre/post trimmed fastq files into MultiQC report
+    https://multiqc.info/docs/#running-multiqc
+    """
 
-// rule multiqc:
+    input:
+        val check
+
+    shell:
+        """
+        set -exo pipefail
+
+        multiqc -f -v \\
+            -c !{params.workdir}/config/multiqc_config.yaml \\
+            -d -dd 1 \\
+            !{params.workdir}/00_QC/03_MultiQC \\
+            !{params.workdir}/00_QC/05_QC_ScreenRRNA \\
+            !{params.workdir}/00_QC/04_QC_ScreenSpecies \\
+            -o !{params.workdir}/00_QC/
+
+        """
+}
+
 
 // rule qc_troubleshoot:
 
@@ -389,7 +490,6 @@ process DeDup {
             -o !{params.workdir}/02_bam/02_dedup/!{samplefile}.dedup.si.bam;
         samtools index -@ !{params.threads} !{params.workdir}/02_bam/02_dedup/!{samplefile}.dedup.si.bam;
         """
-
 }
 
 process Remove_Spliced_Reads {
@@ -440,7 +540,6 @@ process CTK_Peak_Calling {
         --out-half-PH /data2/03_peaks/01_bed/!{samplefile}.peaks.halfPH.bed \
         --multi-test
         """
-
 }
 
 process Create_Safs {
@@ -498,7 +597,7 @@ process Feature_Counts {
             -s 1 \\
             -T !{params.featureCounts.threads} \\
             -o /data2/03_peaks/03_counts/!{samplefile}_ALLreadpeaks_uniqueCounts.txt \\
-            /data2/bamfiles/!{samplefile}.dedup.si.bam;
+            /data2/02_bam/02_dedup/!{samplefile}.filtered.bam;
         featureCounts -F SAF \\
             -a /data2/03_peaks/02_SAF/!{samplefile}.saf \\
             -M \\
@@ -509,7 +608,7 @@ process Feature_Counts {
             -s 1 \\
             -T !{params.featureCounts.threads} \\
             -o /data2/03_peaks/03_counts/!{samplefile}_ALLreadpeaks_FracMMCounts.txt \\
-            /data2/bamfiles/!{samplefile}.dedup.si.bam;
+            /data2/02_bam/02_dedup/!{samplefile}.filtered.bam;
         featureCounts -F SAF \\
             -a /data2/03_peaks/02_SAF/!{samplefile}.saf \\
             -M \\
@@ -518,13 +617,13 @@ process Feature_Counts {
             -s 1 \\
             -T !{params.featureCounts.threads} \\
             -o /data2/03_peaks/03_counts/!{samplefile}_ALLreadpeaks_totalCounts.txt \\
-            /data2/bamfiles/!{samplefile}.dedup.si.bam;
+            /data2/02_bam/02_dedup/!{samplefile}.filtered.bam;
         """
 }
 
-process Alternate_Path {
+process CombineCounts {
     """
-    Place-holder name - bypassing peak junction and maybe more
+    Combining the different type of counts done in FeatureCounts
     """
 
     input:
@@ -544,229 +643,67 @@ process Alternate_Path {
         """
 }
 
-process Peak_Junction {
+process Peak_Annotation {
     """
-    find peak junctions, annotations peaks, merges junction and annotation information
-    """
-
-    input:
-        val samplefile
-
-    output:
-        val samplefile
-
-    shell:
-        """
-        #bash script to run bedtools and get site2peak lookuptable
-        bash !{params.workdir}/workflow/scripts/05_get_site2peak_lookup.sh \\
-             !{params.workdir}/03_peaks/03_counts/!{samplefile}_!{params.peakid}readpeaks_FracMMCounts.txt.jcounts \\
-             !{params.workdir}/03_peaks/03_counts/!{samplefile}_!{params.peakid}readpeaks_FracMMCounts.txt \\
-             !{samplefile}_!{params.peakid} \\
-             !{params.workdir}/04_annotation/02_peaks/ \\
-             !{params.workdir}/workflow/scripts/05_jcounts2peakconnections.py
-
-
-        # above bash script will create {output.splice_table}
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_junctions.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --peak_unique !{params.workdir}/03_peaks/03_counts/!{samplefile}_!{params.peakid}readpeaks_uniqueCounts.txt \\
-            --peak_all !{params.workdir}/03_peaks/03_counts/!{samplefile}_!{params.peakid}readpeaks_FracMMCounts.txt \\
-            --peak_total !{params.workdir}/03_peaks/03_counts/!{samplefile}_!{params.peakid}readpeaks_totalCounts.txt \\
-            --join_junction !{params.sp_junc} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --demethod !{params.DEmethod} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --splice_table !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}_connected_peaks.txt \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/ \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt \\
-            --out_dir_DEP !{params.workdir}/05_demethod/01_input/ \\
-            --output_file_error !{params.workdir}/04_annotation/read_depth_error.txt
-        """
-
-}
-
-process Peak_Transcripts {
-    """
-    find peak junctions, annotations peaks, merges junction and annotation information
-    why is this the same description as Peak_Junction ?
+    Annotate peaks with GeneCode, Introns, and RepeatMasker
     """
 
     input:
         val samplefile
 
     output:
-        val samplefile
+        val(samplefile)
 
     shell:
         """
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_Transcript.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --anno_dir !{params.workdir}/04_annotation/01_project/ \\
-            --reftable_path !{params.a_config} \\
-            --gencode_path !{params."${params.reference}".gencodepath} \\
-            --intron_path !{params."${params.reference}".intronpath} \\
-            --rmsk_path !{params."${params.reference}".rmskpath} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/ \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions_transcripts_SameStrand.txt \\
-            --anno_strand "SameStrand"
+        awk -v OFS='\t' '(NR>1) {print \$2, \$3, \$4, \$1, 0, \$5, \$6, \$7, \$8, \$9 }' \\
+          !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed
 
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_Transcript.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --anno_dir !{params.workdir}/04_annotation/01_project/ \\
-            --reftable_path !{params.a_config} \\
-            --gencode_path !{params."${params.reference}".gencodepath} \\
-            --intron_path !{params."${params.reference}".intronpath} \\
-            --rmsk_path !{params."${params.reference}".rmskpath} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/ \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions_transcripts_OppoStrand.txt \\
-            --anno_strand "OppoStrand"
+        bedtools intersect -s -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.SameStrand.bed
+
+        bedtools intersect -s -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed \\
+          | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$14, arr, "_"); \$18 = arr[3]} \$14 == "." { \$18 = "." } 1' \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed
+
+        bedtools intersect -s -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed
+
+
+        bedtools intersect -S -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.OppoStrand.bed
+
+        bedtools intersect -S -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.OppoStrand.bed
+
+        bedtools intersect -S -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed \\
+          | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$14, arr, "_"); \$18 = arr[3]} \$14 == "." { \$18 = "." } 1' \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed
+
+
+        python !{params.workdir}/workflow/scripts/AnnotationFormat.py \\
+          --SameStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.SameStrand.bed \\
+          --SameStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed \\
+          --SameStrandIntrons !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed \\
+          --OppoStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.OppoStrand.bed \\
+          --OppoStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.OppoStrand.bed \\
+          --OppoStrandIntrons !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed \\
+          --Output !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt
+
         """
-
-}
-
-process Peak_ExonIntron {
-    """
-    find peak junctions, annotations peaks, merges junction and annotation information
-    why is this the same description as Peak_Junction ?
-    """
-
-    input:
-        val samplefile
-
-    output:
-        val samplefile
-
-    shell:
-        """
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_ExonIntron.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --anno_dir !{params.workdir}/04_annotation/01_project/ \\
-            --reftable_path !{params.a_config} \\
-            --gencode_path !{params."${params.reference}".gencodepath} \\
-            --intron_path !{params."${params.reference}".intronpath} \\
-            --rmsk_path !{params."${params.reference}".rmskpath} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/same \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions_IntronExon_SameStrand.txt \\
-            --anno_strand "SameStrand" 
-
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_ExonIntron.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --anno_dir !{params.workdir}/04_annotation/01_project/ \\
-            --reftable_path !{params.a_config} \\
-            --gencode_path !{params."${params.reference}".gencodepath} \\
-            --intron_path !{params."${params.reference}".intronpath} \\
-            --rmsk_path !{params."${params.reference}".rmskpath} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/oppo \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions_IntronExon_OppoStrand.txt \\
-            --anno_strand "OppoStrand"
-        """
-}
-
-
-process Peak_RMSK {
-    """
-    find peak junctions, annotations peaks, merges junction and annotation information
-    why is this the same description as Peak_Junction ?
-    """
-
-    input:
-        val samplefile
-
-    output:
-        val samplefile
-
-    shell:
-        """
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_RMSK.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --anno_dir !{params.workdir}/04_annotation/01_project/ \\
-            --reftable_path !{params.a_config} \\
-            --gencode_path !{params."${params.reference}".gencodepath} \\
-            --intron_path !{params."${params.reference}".intronpath} \\
-            --rmsk_path !{params."${params.reference}".rmskpath} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/ \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions_RMSK_SameStrand.txt \\
-            --anno_strand "SameStrand"
-
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_RMSK.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --anno_dir !{params.workdir}/04_annotation/01_project/ \\
-            --reftable_path !{params.a_config} \\
-            --gencode_path !{params."${params.reference}".gencodepath} \\
-            --intron_path !{params."${params.reference}".intronpath} \\
-            --rmsk_path !{params."${params.reference}".rmskpath} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/ \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions_RMSK_OppoStrand.txt \\
-            --anno_strand "OppoStrand"
-        """
-}
-
-process Peak_Process {
-    """
-    find peak junctions, annotations peaks, merges junction and annotation information
-    why is this the same description as Peak_Junction ?
-    """
-
-    input:
-        val samplefile
-
-    output:
-        val samplefile
-
-    shell:
-        """
-        Rscript !{params.workdir}/workflow/scripts/05_Anno_Process.R \\
-            --rscript !{params.workdir}/workflow/scripts/05_peak_annotation_functions_V2.3.R \\
-            --peak_type !{params.peakid} \\
-            --anno_anchor !{params.AnnoAnchor} \\
-            --read_depth !{params.mincount} \\
-            --sample_id !{samplefile} \\
-            --ref_species !{params.reference} \\
-            --tmp_dir !{params.workdir}/01_preprocess/07_rscripts/ \\
-            --out_dir !{params.workdir}/04_annotation/02_peaks/ \\
-            --out_file !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt
-        """
-
 }
 
 
@@ -779,12 +716,12 @@ process Annotation_Report {
         val samplefile
 
     output:
-        val samplefile
+        val "AnnotationDone"
 
     shell:
         """
         Rscript -e 'library(rmarkdown); \
-        rmarkdown::render("!{params.workdir}/workflow/scripts/06_annotation.Rmd",
+        rmarkdown::render("!{params.workdir}/workflow/scripts/06_annotation.Rmd", \
             output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
             params= list(samplename = "!{samplefile}", \
                 peak_in = "!{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt", \
@@ -795,15 +732,10 @@ process Annotation_Report {
 
 }
 
-
-
-
-MANORM_constrasts = Channel.of( ['YKO_Clip3', 'Ro_Clip3'], ['Y1KO_Clip3', 'Ro_Clip3'], ['Y3KO_Clip3', 'Ro_Clip3'] ) 
-
 process MANORM_analysis {
 
     input:
-       tuple val(sample), val(background)
+       tuple val(annotation_check), val(sample), val(background)
 
     output:
         tuple val(sample), val(background)
@@ -928,27 +860,6 @@ process Manorm_Report {
 
 
 workflow {
-    //Create_Project_Annotations(create_unique)
-    //Init_ReadCounts_Reportfile(create_unique)
-    //QC_Barcode(rawfiles)
-    //Demultiplex(rawfiles)
-    //Star(bamfiles)
-    //Index_Stats(Star.out)
-    //Check_ReadCounts(Index_Stats.out)
-    //DeDup(Check_ReadCounts.out)
-    //Remove_Spliced_Reads(DeDup.out)
-    //CTK_Peak_Calling(Remove_Spliced_Reads.out)
-    //Create_Safs(CTK_Peak_Calling.out)
-    //Feature_Counts(Create_Safs.out)
-    //Alternate_Path(Feature_Counts.out)
-    //Peak_Junction(Feature_Counts.out)
-    //Peak_Transcripts(Peak_Junction.out)
-    //Peak_ExonIntron(Peak_Transcripts.out)
-    //Peak_RMSK(Peak_ExonIntron.out)
-    //Peak_Process(Peak_RMSK.out)
-    //Annotation_Report(Peak_Process.out)
-    //Annotation_Report(bedfiles)
-    //MANORM_analysis(MANORM_constrasts)
 
     Create_Project_Annotations(unique_ch) | Init_ReadCounts_Reportfile
 
@@ -956,16 +867,12 @@ workflow {
     QC_Barcode(rawfiles_tuple) | Demultiplex
 
     samplefiles_tuple = Demultiplex.out.combine(samplefiles_ch)
-    Star(samplefiles_tuple) | Index_Stats | Check_ReadCounts | DeDup | Remove_Spliced_Reads | CTK_Peak_Calling | Create_Safs | Feature_Counts | Alternate_Path
+    Star(samplefiles_tuple) | Index_Stats | Check_ReadCounts | DeDup | Remove_Spliced_Reads | CTK_Peak_Calling | Create_Safs | Feature_Counts | CombineCounts
 
-    Peak_Transcripts(Alternate_Path.out)
-    Peak_ExonIntron(Alternate_Path.out)
-    Peak_RMSK(Alternate_Path.out)
+    FastQC(samplefiles_tuple) | QC_Screen_Validator 
+    MultiQC(QC_Screen_Validator.out.unique())
 
-    collapsed_channel = Peak_Transcripts.out.concat(Peak_ExonIntron.out, Peak_RMSK.out).unique()
+    Peak_Annotation(CombineCounts.out) | Annotation_Report | MultiQC
+    MANORM_analysis(Annotation_Report.out.combine(contrasts_ch).unique())
 
-    //Peak_Process(collapsed_channel) | Annotation_Report
-
-    //samplefiles_tuple.view()
-    
 }

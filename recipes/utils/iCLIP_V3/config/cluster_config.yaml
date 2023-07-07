@@ -1,0 +1,138 @@
+# cluster configuration
+__default__:
+    gres: lscratch:96
+    mem: 40g
+    partition: ccr,norm
+    time: 00-08:00:00
+    threads: 32
+    output: .%j.{wildcards}.out
+    error: .%j.{wildcards}.err
+
+qc_barcode:
+    threads: 8
+    mem: 75g
+    time: 00-04:00:00
+
+demultiplex:
+    threads: 56
+    mem: 32g
+    gres: lscratch:800
+    time: 00-05:00:00
+
+nondemux:
+    time: 00-01:00:00
+
+qc_fastq:
+    threads: 4
+    mem: 3g
+    time: 00-03:00:00
+
+qc_screen_validator:
+    mem: 32g
+    time: 00-03:00:00
+
+star:
+    time: 04-00:00:00
+    gres: lscratch:800
+    threads: 16
+    mem: 120g
+
+index_stats:
+    threads: 8
+    gres: lscratch:800
+    mem: 200g
+    time: 01-00:00:00
+
+qc_troubleshoot:
+    threads: 4
+    mem: 3g
+
+dedup:
+    threads: 8
+    mem: 200g
+    gres: lscratch:256
+    time: 02-00:00:00
+
+create_beds_safs:
+    mem: 200g
+    gres: lscratch:512
+    threads: 8
+
+bgzip_beds:
+    mem: 100g
+    threads: 4
+
+feature_counts:
+    threads: 8
+    mem: 200g
+
+project_annotations:
+    threads: 2
+    mem: 10g
+    time: 00-01:00:00
+
+peak_junctions:
+    threads: 10
+    gres: lscratch:128
+    mem: 36g
+    time: 04-00:00:00
+    
+peak_Transcripts:
+    threads: 4
+    gres: lscratch:128
+    mem: 30g
+    time: 04-00:00:00    
+
+peak_ExonIntron:
+    threads: 4
+    gres: lscratch:128
+    mem: 30g
+    time: 04-00:00:00 
+
+peak_RMSK:
+    threads: 4
+    gres: lscratch:128
+    mem: 30g
+    time: 04-00:00:00 
+    
+annotation_report:
+    threads: 4
+    gres: lscratch:128
+    mem: 30g
+    time: 00-12:00:00
+
+MANORM_beds:
+    threads: 4
+    mem: 30g
+
+MANORM_analysis:
+    threads: 4
+    mem: 30g
+    time: 04-00:00:00
+
+MANORM_post_processing:
+    threads: 2
+    mem: 30g
+    time: 00-12:00:00
+
+MANORM_RMD:
+    threads: 2
+    mem: 30g
+    time: 00-02:00:00
+
+DIFFBIND_beds:
+    threads: 4
+    mem: 30g
+    
+DIFFBIND_preprocess:
+    threads: 4
+    mem: 30g
+
+DIFFBIND_analysis:
+    threads: 4
+    mem: 30g
+
+
+DIFFBIND_report:
+    threads: 4
+    mem: 30g

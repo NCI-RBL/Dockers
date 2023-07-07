@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #SBATCH --job-name wil_works
-#SBATCH --ntasks=4
-#SBATCH --cpus-per-task=5 
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=2 
 #SBATCH --partition=norm,quick
-#SBATCH --time=48:00:00
+#SBATCH --time=02:00:00
 #SBATCH --gres=lscratch:24 
 #SBATCH --mem=250g
 
@@ -16,8 +16,18 @@ module load STAR
 module load samtools
 module load umitools
 module load manorm
+module load ultraplex
+module load multiqc
+module load fastqc
+module load fastq_screen
+module load bowtie 
 
-
-#nextflow run iCLIP_light.nf -c nextflow.config --workdir $PWD --reference mm10 -params-file config/nextflow.parameters.yaml -resume
-nextflow run iCLIP_light.nf -c nextflow.config --workdir $PWD --reference mm10 -params-file config/nextflow.parameters.yaml 
-
+nextflow run iCLIP_light.nf -c nextflow.config \
+	--workdir $PWD \
+	--reference mm10 \
+	-params-file config/nextflow.parameters.yaml \
+        --outdir ${project}/ ${Arguments} \
+	-with-report ${project}/Report.html \
+	-with-dag ${project}/Flowchart.html \
+	-with-timeline ${project}/Timeline.html #\
+	#-resume
