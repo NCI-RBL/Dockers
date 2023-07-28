@@ -1,10 +1,54 @@
-FROM wilfriedguiblet/ctk:v0.1 
+FROM nciccbr/ccbr_ubuntu_base_20.04:v2.1  
 
 ENV TAG="v0.1"
+ENV STAR_VERSION 2.7.10a
 
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+#RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
 ENV PATH=$CONDA_DIR/bin:$PATH
+RUN conda config --env --append channels conda-forge && \
+    conda config --env --append channels bioconda &&\
+    conda config --env --set restore_free_channel true
+
+
+WORKDIR /opt2
+
+# install star
+RUN wget --no-check-certificate https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz && \
+    tar -xzf ${STAR_VERSION}.tar.gz && \
+    rm -f ${STAR_VERSION}.tar.gz && \
+    cd /opt2/STAR-${STAR_VERSION}/source && \
+    make STAR
+ENV PATH=/opt2/STAR-${STAR_VERSION}/source:$PATH
+
+# Install umi_tools
+#RUN conda install -c bioconda -c conda-forge umi_tools
+RUN pip install umi_tools
+
+# Install manorm
+#RUN conda install -c bioconda manorm
+RUN pip install manorm
+
+# Install subread 
 RUN conda install -c bioconda subread
 
+# Install CTK
+RUN conda install --yes -c chaolinzhanglab ctk
+
+# Install ultraplex
+RUN conda install -c bioconda ultraplex
+
+# Install multiqc
+RUN conda install multiqc
+
+# Install fastqc
+RUN conda install -c bioconda fastqc
+
+# Install fastq-screen
+RUN conda install -c bioconda fastq-screen
 
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}

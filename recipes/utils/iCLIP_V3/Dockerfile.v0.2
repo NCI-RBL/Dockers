@@ -1,0 +1,28 @@
+FROM wilfriedguiblet/iclip:v3.0.1  
+
+ENV TAG="v0.2"
+
+COPY ToCopy /opt2
+
+RUN chmod a+x /opt2/workflow/scripts/02_barcode_qc.R && \
+    chmod a+x /opt2/workflow/scripts/03_qc_report.Rmd  && \
+    chmod a+x /opt2/workflow/scripts/03_qc_unmapped_check.sh  && \
+    chmod a+x /opt2/workflow/scripts/04_annotation.R  && \
+    chmod a+x /opt2/workflow/scripts/05_countmerger.py  && \
+    chmod a+x /opt2/workflow/scripts/AnnotationFormat.py  && \
+    chmod a+x /opt2/workflow/scripts/06_annotation.Rmd  && \
+    chmod a+x /opt2/workflow/scripts/07_DIFFBIND_Process.R  && \
+    chmod a+x /opt2/workflow/scripts/07_DIFFBIND_PreProcess.R  && \
+    chmod a+x /opt2/workflow/scripts/08_MAnormAnnotation.Rmd
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE

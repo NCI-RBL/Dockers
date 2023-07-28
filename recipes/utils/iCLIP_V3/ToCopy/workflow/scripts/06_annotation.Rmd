@@ -1,0 +1,171 @@
+---
+title: "Peak Annotation Report"
+output: html_document
+
+params:
+  samplename: ""
+  peak_in: ""
+  output_table: ""
+  readdepth: 3
+  PeakIdnt: "ALL" #MultiMap, Unique, all
+---
+
+
+ <!-- # Load libraries, set theme -->
+```{r SetEnvironment, include=F ,echo=F,warning=F,message=FALSE}
+rm(list=setdiff(ls(), "params"))
+library(rmarkdown)
+library(stringr)
+library(rtracklayer)
+library(VariantAnnotation,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(rmarkdown)
+library(ggplot2,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library("viridis",quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(edgeR,quietly = T,verbose = F)
+library('GenomicFeatures',quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library('rtracklayer',quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(matrixStats,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(plyr,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(tidyr,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(fitdistrplus,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(stringr,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+library(data.table)
+library(reshape)
+library(knitr)
+library(stringi)
+library(BSgenome)
+library(biomaRt)
+library(plotly)
+library(tidyr)
+library(GenomicRanges)
+library(RColorBrewer)
+library('gplots')
+library(ggpubr)
+library(circlize)
+library('regioneR')
+library(scales)
+blank_theme <- theme_minimal()+
+  theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  plot.title=element_text(size=14, face="bold")
+  )
+```
+
+
+
+<!-- # Set params, output   -->
+
+```{r SetParams, echo=F, message=FALSE, warning=FALSE, eval=T, include=F,results=F,}
+peak_in=read.table(params$peak_in, sep = '\t', header=TRUE, fill=TRUE)
+samplename=params$samplename
+readdepth=as.numeric(params$readdepth)
+output_table=params$output_table
+PeakIdnt=params$PeakIdnt
+incd_rRNA=T # What it this?
+```
+
+<!-- # Set color schemes  -->
+
+```{r SetColorSchemes, echo=F, message=FALSE, warning=FALSE, eval=T, include=F,results=F,}
+nc_color= c(
+  'yRNA'= "#A6CEE3",
+  'snRNA'= "#1F78B4",
+  'snoRNA'="#B2DF8A" ,
+  'srpRNA'= "#33A02C",
+  'tRNA'=   "#FB9A99",
+  '7SKRNA'= "#E31A1C",
+  'scRNA'=  "#FDBF6F",
+  'sncRNA'= "#FF7F00",
+  'scaRNA'= "#CAB2D6",
+  'miRNA'= "#6A3D9A" ,
+  'vaultRNA'= "#FFFF99",
+  'sRNA'= "#B15928"   ,
+  'rRNA'=  "#1fb487"  ,
+  'miscRNA'= "grey",
+  'misc_RNA'= "grey"
+)
+class_color=c(
+  "ncRNA"="#1B9E77",
+  "rRNA" ="#1fb487",
+  "yRNA"= "#2bdba6" ,
+  "protein_coding: Exonic"="#D95F02",
+  "Repeat Element"="#7570B3" ,
+  "pseudogene"="#E7298A", 
+  "Antisense Feature"="#66A61E", 
+  "protein_coding: Intronic"="#E6AB02", 
+  "lncRNA: Exonic"="#A6761D",
+  "lncRNA: Intronic"="#A6761D",
+  "no Feature"="#666666")
+```
+
+<!-- #   -->
+
+
+
+```{r ReadClasses, echo=F, message=FALSE, warning=FALSE, eval=T, include=F,results=F,}
+# Identification of CLIP peaks: `r toString(params$samplename)`    
+
+Peaks_Anno = peak_in
+
+Peaks_Anno$Same_Comb_type = 
+    factor(peak_in$Same_Comb_type, 
+           levels = c("ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
+                      "Antisense Feature","protein_coding: Intronic","lncRNA: Intronic", "lncRNA: Exonic","no Feature"))  
+
+Peaks_Anno$Oppo_Comb_type = 
+    factor(peak_in$Oppo_Comb_type, 
+           levels = c("ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
+                      "Antisense Feature","protein_coding: Intronic","lncRNA: Intronic", "lncRNA: Exonic","no Feature"))  
+
+
+###### remove chrM clip peaks
+Peaks_Anno=Peaks_Anno[Peaks_Anno$chrom%in%'chrM'==F,] 
+#Peaks_Anno=Peaks_Anno[1:10,]
+```
+
+
+
+# CLIP peak annotations: `r toString(samplename)`  
+  
+## Processing data
+**1. STAR: align reads**
+
+**2. UMI-tools: remove duplicates**
+
+**3. CTK: call CLIP peaks**
+
+<!-- # Histogram of Reads per Peak  -->
+
+
+  Identify peaks with All non-spliced reads (unique and Multimapping) and count number of reads that overlap with the identified peaks.
+  
+  Peaks with > `r toString(readdepth)` (unique + Multi-Mapped:fraction) reads were assessed.  
+
+
+```{r PeakDepthHist,fig.align='center',echo=F,warning=F,eval=T,include=T}
+#print(peak_in)
+##todo - make function with replacement title
+if (params$PeakIdnt=='UNIQUE'){
+  x = ggplot(peak_in, aes(x=Counts_Unique)) +
+    geom_histogram(bins = 30) + 
+    scale_x_continuous(trans = "log2") + 
+    theme_classic() +
+    ylab("# of peaks") + 
+    xlab("Peak Counts (unique)") + 
+    ggtitle("Distribution of peak counts")
+} else if (params$PeakIdnt=='ALL'){
+  x = ggplot(peak_in, aes(x=Counts_fracMM)) +
+    geom_histogram(bins = 30) +
+    scale_x_continuous(trans = "log2") + 
+    theme_classic() +
+    ylab("# of peaks") + 
+    xlab("Peak Counts (Unique + FracMM)") + 
+    ggtitle("Distribution of peak counts")
+}
+ggplotly(x,tooltip = c("x", "y"))
+```
+
