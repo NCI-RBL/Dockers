@@ -2,18 +2,33 @@ FROM wilfriedguiblet/iclip:v3.0.1
 
 ENV TAG="v0.2"
 
-COPY ToCopy /opt2
+# Copy custom scripts
 
-RUN chmod a+x /opt2/workflow/scripts/02_barcode_qc.R && \
-    chmod a+x /opt2/workflow/scripts/03_qc_report.Rmd  && \
-    chmod a+x /opt2/workflow/scripts/03_qc_unmapped_check.sh  && \
-    chmod a+x /opt2/workflow/scripts/04_annotation.R  && \
-    chmod a+x /opt2/workflow/scripts/05_countmerger.py  && \
-    chmod a+x /opt2/workflow/scripts/AnnotationFormat.py  && \
-    chmod a+x /opt2/workflow/scripts/06_annotation.Rmd  && \
-    chmod a+x /opt2/workflow/scripts/07_DIFFBIND_Process.R  && \
-    chmod a+x /opt2/workflow/scripts/07_DIFFBIND_PreProcess.R  && \
-    chmod a+x /opt2/workflow/scripts/08_MAnormAnnotation.Rmd
+COPY config/ /opt2/
+COPY workflow/scripts/ /opt2/
+
+RUN chmod 774  /opt2/02_barcode_qc.R && \
+    chmod 774 /opt2/03_qc_report.Rmd  && \
+    chmod 774 /opt2/03_qc_unmapped_check.sh  && \
+    chmod 774 /opt2/04_annotation.R  && \
+    chmod 774 /opt2/05_countmerger.py  && \
+    chmod 774 /opt2/AnnotationFormat.py  && \
+    chmod 774 /opt2/06_annotation.Rmd  && \
+    chmod 774 /opt2/07_DIFFBIND_Process.R  && \
+    chmod 774 /opt2/07_DIFFBIND_PreProcess.R  && \
+    chmod 774 /opt2/08_MAnormAnnotation.Rmd 
+
+
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+RUN conda install -c r r-essentials
+
+
+
+# Add R dependencies
+
+RUN Rscript -e 'install.packages("data.table", repos = "http://cran.us.r-project.org") '&& \
+    Rscript -e 'install.packages("dplyr", repos = "http://cran.us.r-project.org")'
 
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}

@@ -1,0 +1,28 @@
+FROM wilfriedguiblet/iclip:v3.0.2
+
+ENV TAG="v0.3"
+
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+RUN chmod 774 -R /opt2/fqscreen_rrna_config.conf && \
+    chmod 774 -R /opt2/annotation_config.txt && \
+    chmod 774 -R /opt2/nextflow.parameters.yaml && \
+    chmod 774 -R /opt2/multiqc_config.yaml && \
+    chmod 774 -R /opt2/fqscreen_species_config.conf
+
+# Add R dependencies
+
+RUN Rscript -e 'install.packages("argparse", repos = "http://cran.us.r-project.org")' && \
+    Rscript -e 'install.packages("DescTools", repos = "http://cran.us.r-project.org")'
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
