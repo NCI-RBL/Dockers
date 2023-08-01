@@ -64,7 +64,7 @@ process Create_Project_Annotations {
     Generate BED files of annotations.
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val unique
@@ -74,7 +74,7 @@ process Create_Project_Annotations {
 
     shell:
         """
-        Rscript !{params.sourcedir}/workflow/scripts/04_annotation.R \\
+        Rscript !{params.sourcedir}/04_annotation.R \\
           --ref_species !{params.reference} \\
           --refseq_rRNA !{params.rrna_flag} \\
           --alias_path !{params."${params.reference}".aliaspath} \\
@@ -85,7 +85,7 @@ process Create_Project_Annotations {
           --rmsk_path !{params."${params.reference}".rmskpath} \\
           --custom_path !{params."${params.reference}".additionalannopath} \\
           --out_dir !{params.workdir}/04_annotation/01_project/ \\
-          --reftable_path !{params.a_config} 
+          --reftable_path !{params.sourcedir}/annotation_config.txt 
 
         awk -v OFS='\t' '(NR>1) {print \$6, \$7, \$8, \$11, \$12, \$10, \$13}' !{params."${params.reference}".rmskpath} \\
              > !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed
@@ -98,7 +98,7 @@ process Create_Project_Annotations {
 
 process Init_ReadCounts_Reportfile {
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val unique
@@ -125,7 +125,7 @@ process QC_Barcode {
     --mpid clip3 must be changed to be a variable etracted from relevant manifest
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         tuple val(unique), val(rawfile)
@@ -142,7 +142,7 @@ process QC_Barcode {
             | LC_ALL=C sort --buffer-size=!{params.qc_barcode.memory} --parallel=!{params.qc_barcode.threads} --temporary-directory='!{params.tempdir}' -n \\
             | uniq -c > !{params.workdir}/00_QC/01_Barcodes/!{rawfile}_barcode_counts.txt;        
 
-        Rscript !{params.sourcedir}/workflow/scripts/02_barcode_qc.R \\
+        Rscript !{params.sourcedir}/02_barcode_qc.R \\
             --sample_manifest !{params.manifests.samples} \\
             --multiplex_manifest !{params.manifests.multiplex} \\
             --barcode_input !{params.workdir}/00_QC/01_Barcodes/!{rawfile}_barcode_counts.txt \\
@@ -169,7 +169,7 @@ process Demultiplex {
     SIM_iCLIP_S1    Control_Clip    CNTRL       NNNCGGANN   AGATCGGAAGAGCGGTTCAG
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val rawfile
@@ -187,7 +187,7 @@ process Demultiplex {
             --threads !{params.demultiplex.threads} \\
             --barcodes !{params.manifests.barcode} \\
             --directory !{params.workdir}/01_preprocess/01_fastq/ \\
-            --inputfastq !{params.workdir}/rawfiles/!{rawfile}.fastq.gz \\
+            --inputfastq !{params.rawdir}/!{rawfile}.fastq.gz \\
             --final_min_length !{params.demultiplex.filterlength} \\
             --phredquality !{params.demultiplex.phredQuality} \\
             --fiveprimemismatches !{params.mismatch} \\
@@ -201,7 +201,7 @@ process Star {
     https://github.com/alexdobin/STAR/releases
 
     """
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         tuple val(rawfile), val(samplefile)
@@ -272,7 +272,7 @@ process Index_Stats{
     run samstats on files
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -286,10 +286,10 @@ process Index_Stats{
         
         # Index
         cp !{params.workdir}/01_preprocess/02_alignment/!{samplefile}_Aligned.sortedByCoord.out.bam !{params.workdir}/02_bam/01_merged/!{samplefile}.si.bam
-        samtools index -@ !{params.threads} !{params.workdir}/02_bam/01_merged/!{samplefile}.si.bam;
+        samtools index -@ !{params.featureCounts.threads} !{params.workdir}/02_bam/01_merged/!{samplefile}.si.bam;
         
         # Run samstats
-        samtools stats --threads !{params.threads} !{params.workdir}/02_bam/01_merged/!{samplefile}.si.bam > !{params.workdir}/00_QC/02_SamStats/!{samplefile}_samstats.txt
+        samtools stats --threads !{params.featureCounts.threads} !{params.workdir}/02_bam/01_merged/!{samplefile}.si.bam > !{params.workdir}/00_QC/02_SamStats/!{samplefile}_samstats.txt
         """
 
 }
@@ -304,7 +304,7 @@ process Check_ReadCounts {
     http://www.htslib.org/doc/samtools-stats.html
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -346,7 +346,7 @@ if [ 1 -eq "\$(echo "\${{fail}} > 0" | bc)" ]; then
 
 process FastQC {
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         tuple val(rawfile), val(samplefile)
@@ -379,7 +379,7 @@ process QC_Screen_Validator {
         Log file containing any warnings or errors on file
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -396,14 +396,14 @@ process QC_Screen_Validator {
          > !{params.workdir}/temp/!{samplefile}.fastq;
         
         # Run FastQ Screen
-        fastq_screen --conf !{params.workdir}/config/fqscreen_species_config.conf \\
+        fastq_screen --conf !{params.sourcedir}/fqscreen_species_config.conf \\
             --outdir !{params.workdir}/00_QC/04_QC_ScreenSpecies \\
             --threads !{params.QC_Screen_Validator.threads} \\
             --subset 1000000 \\
             --aligner bowtie2 \\
             --force \\
             !{params.workdir}/temp/!{samplefile}.fastq ;
-        fastq_screen --conf !{params.workdir}/config/fqscreen_rrna_config.conf \\
+        fastq_screen --conf !{params.sourcedir}/fqscreen_rrna_config.conf \\
             --outdir !{params.workdir}/00_QC/05_QC_ScreenRRNA \\
             --threads !{params.QC_Screen_Validator.threads} \\
             --subset 1000000 \\
@@ -433,7 +433,7 @@ process MultiQC {
     https://multiqc.info/docs/#running-multiqc
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val check
@@ -443,7 +443,7 @@ process MultiQC {
         set -exo pipefail
 
         multiqc -f -v \\
-            -c !{params.sourcedir}/config/multiqc_config.yaml \\
+            -c !{params.sourcedir}/multiqc_config.yaml \\
             -d -dd 1 \\
             !{params.workdir}/00_QC/03_MultiQC \\
             !{params.workdir}/00_QC/05_QC_ScreenRRNA \\
@@ -465,7 +465,7 @@ process DeDup {
     get header of dedup file
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -488,10 +488,10 @@ process DeDup {
             --log2stderr;
         
         # Sort and Index
-        samtools sort --threads !{params.threads} -m 10G -T !{params.workdir}/temp/ \\
+        samtools sort --threads !{params.featureCounts.threads} -m 10G -T !{params.workdir}/temp/ \\
             !{params.workdir}/temp/!{samplefile}.unmasked.bam \\
             -o !{params.workdir}/02_bam/02_dedup/!{samplefile}.dedup.si.bam;
-        samtools index -@ !{params.threads} !{params.workdir}/02_bam/02_dedup/!{samplefile}.dedup.si.bam;
+        samtools index -@ !{params.featureCounts.threads} !{params.workdir}/02_bam/02_dedup/!{samplefile}.dedup.si.bam;
         """
 }
 
@@ -501,7 +501,7 @@ process Remove_Spliced_Reads {
     Spliced reads create spliced peaks and will be dealt with by mapping against the transcriptome.
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -512,7 +512,7 @@ process Remove_Spliced_Reads {
     shell:
         """
         samtools view -h !{params.workdir}/02_bam/02_dedup/!{samplefile}.dedup.si.bam | awk -v OFS="\t" '\$0 ~ /^@/{print \$0;next;} \$6 !~ /N/' | samtools view -b > !{params.workdir}/02_bam/02_dedup/!{samplefile}.filtered.bam
-        samtools index -@ !{params.threads} !{params.workdir}/02_bam/02_dedup/!{samplefile}.filtered.bam
+        samtools index -@ !{params.featureCounts.threads} !{params.workdir}/02_bam/02_dedup/!{samplefile}.filtered.bam
         """
 }
 
@@ -552,7 +552,7 @@ process Create_Safs {
     Reformat BED into SAF.
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -583,7 +583,7 @@ process Feature_Counts {
     all reads as input and the second takes only unique reads as input
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -633,7 +633,7 @@ process CombineCounts {
     Combining the different type of counts done in FeatureCounts
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -644,7 +644,7 @@ process CombineCounts {
     shell:
         """
         # Usage: script input1 input2 input3 output
-        python !{params.workdir}/workflow/scripts/05_countmerger.py \\
+        python !{params.sourcedir}/05_countmerger.py \\
                     --uniqueCountsFile !{params.workdir}/03_peaks/03_counts/!{samplefile}_ALLreadpeaks_uniqueCounts.txt \\
                     --FracMMCountsFile !{params.workdir}/03_peaks/03_counts/!{samplefile}_ALLreadpeaks_FracMMCounts.txt \\
                     --totalCountsFile !{params.workdir}/03_peaks/03_counts/!{samplefile}_ALLreadpeaks_totalCounts.txt \\
@@ -657,7 +657,7 @@ process Peak_Annotation {
     Annotate peaks with GeneCode, Introns, and RepeatMasker
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -705,7 +705,7 @@ process Peak_Annotation {
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed
 
 
-        python !{params.sourcedir}/workflow/scripts/AnnotationFormat.py \\
+        python !{params.sourcedir}/AnnotationFormat.py \\
           --SameStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandIntrons !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed \\
@@ -723,7 +723,7 @@ process Annotation_Report {
     generates an HTML report for peak annotations
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    //container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -733,21 +733,22 @@ process Annotation_Report {
 
     shell:
         """
-        Rscript -e 'library(rmarkdown); \
-        rmarkdown::render("!{params.sourcedir}/workflow/scripts/06_annotation.Rmd", \
-            output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
-            params= list(samplename = "!{samplefile}", \
-                peak_in = "!{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt", \
-                output_table = "!{params.workdir}/04_annotation/!{samplefile}_annotation_!{params.peakid}readPeaks_final_table.txt", \
-                readdepth = "!{params.mincount}", \
-                PeakIdnt = "!{params.peakid}"))'
+        echo 'boom'
+        #Rscript -e 'library(rmarkdown); \
+        #rmarkdown::render("!{params.workdir}/06_annotation.Rmd", \
+        #    output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
+        #    params= list(samplename = "!{samplefile}", \
+        #        peak_in = "!{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt", \
+        #        output_table = "!{params.workdir}/04_annotation/!{samplefile}_annotation_!{params.peakid}readPeaks_final_table.txt", \
+        #        readdepth = "!{params.mincount}", \
+        #        PeakIdnt = "!{params.peakid}"))'
         """        
 
 }
 
 process MANORM_analysis {
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
        tuple val(sample), val(background), val(dummy)
@@ -767,8 +768,8 @@ process MANORM_analysis {
             -p 1 \\
             -m 0 \\
             -w !{params.manorm_w} \\
-            -d !{params.manorm_d} \\
-            -s \\
+            --summit-dis !{params.manorm_d} \\
+            --wa \\
             -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background} \\
             --name1 !{sample} \\
             --name2 !{background}
@@ -798,7 +799,7 @@ process MANORM_analysis {
 
 process Manorm_Report {
 
-    container 'wilfriedguiblet/iclip:v3.0.1' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
        tuple val(sample), val(background)
