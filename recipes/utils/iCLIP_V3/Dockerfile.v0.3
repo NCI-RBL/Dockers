@@ -4,6 +4,8 @@ ENV TAG="v0.3"
 
 ENV PATH=$CONDA_DIR/bin:$PATH
 
+# Update more permissions
+
 RUN chmod 774 -R /opt2/fqscreen_rrna_config.conf && \
     chmod 774 -R /opt2/annotation_config.txt && \
     chmod 774 -R /opt2/nextflow.parameters.yaml && \
@@ -14,6 +16,10 @@ RUN chmod 774 -R /opt2/fqscreen_rrna_config.conf && \
 
 RUN Rscript -e 'install.packages("argparse", repos = "http://cran.us.r-project.org")' && \
     Rscript -e 'install.packages("DescTools", repos = "http://cran.us.r-project.org")'
+
+# Upgrade numpy
+
+RUN pip install numpy --upgrade
 
 # cleanup etc
 COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
