@@ -543,7 +543,8 @@ process CTK_Peak_Calling {
         !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.bed \
         --out-boundary !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed \
         --out-half-PH !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.halfPH.bed \
-        --multi-test
+        --multi-test \
+        -minPH {!params.CTK.minimum_peak_height}
         """
 }
 
