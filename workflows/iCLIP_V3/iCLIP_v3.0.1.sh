@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #SBATCH --job-name iCLIPv3.0.1
-#SBATCH --ntasks=8
-#SBATCH --cpus-per-task=8 
-#SBATCH --partition=norm,quick
-#SBATCH --time=8:00:00
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=2 
+#SBATCH --partition=ccr,norm
+#SBATCH --time=4:00:00
 #SBATCH --gres=lscratch:24 
 #SBATCH --mem=350g
 

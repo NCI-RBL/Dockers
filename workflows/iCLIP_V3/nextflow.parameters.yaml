@@ -12,6 +12,7 @@ rawfilesnames: # list of raw files names
   #- '2_PARiCLIP_mRO2_S1_R1_001'
   #- 'toyfile'
   #- 'toyfile2'
+  #- 'toyfile3'
 
 rawdir: '/data/RBL_NCI/WilTemp/iCLIP/rawfiles/' # directory for rawfiles
 
@@ -31,7 +32,7 @@ contrasts:
 reference: "" # reference organism ["hg38","mm10"]
 include_rRNA: "Y" # whether to include refseq rRNA's in annotations ["Y", "N"]
 peakid: "ALL"
-mincount: 3 #minimum number of reads to count as a peak [1,2,3]
+#mincount: 3 #minimum number of reads to count as a peak [1,2,3]
 DEmethod: "NONE" #DE method ["NONE", "MANORM", "DIFFBIND"]
 mismatch: 1 #required for multiplexed samples, number of bp mismatches allowed in demultiplexing [1,2,3]
 min_reads_mapped: 0.5 #minimum percent of reads that should be mapped; IE .5 for 50% of all reads must be mapped [0.5]
@@ -39,33 +40,34 @@ umiSeparator: "rbc:" #required for nondemultiplexed samples to determine delimit
 multiplexflag: "Y" #whether samples are multiplexed ["Y","N"]
 MANormWidth: 50 #Width of window to calculate read density. [any integer >1; default 50]
 MNormDistance: 25 #Summit-to-summit distance cutoff for common peaks. [ any integer >1; default MANormWidth/2]
+MANormPValue: 0.05
 
-containerDir: "/data/CCBR_Pipeliner/iCLIP/container"
-fastq_val: "/data/CCBR_Pipeliner/iCLIP/bin/fastQValidator"
+containerDir: "/data/CCBR_Pipeliner/Pipelines/iCLIP/container"
+fastq_val: "/data/CCBR_Pipeliner/Pipelines/iCLIP/bin/fastQValidator"
 
 #########################################################################################
 # Index paths
 #########################################################################################
 hg38:
-  stardir: '/data/CCBR_Pipeliner/iCLIP/index/active/2022_0505/hg38/index'
-  stargtf: '/data/CCBR_Pipeliner/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
-  gencodepath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
-  refseqpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
-  canonicalpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
-  intronpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
-  rmskpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
-  aliaspath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
-  additionalannopath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/hg38/additional_anno/'
+  stardir: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/hg38/index'
+  stargtf: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
+  gencodepath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
+  refseqpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
+  canonicalpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
+  intronpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
+  rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
+  aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
+  additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/additional_anno/'
 mm10:
-  stardir: '/data/CCBR_Pipeliner/iCLIP/index/active/2022_0505/mm10/index'
-  stargtf: '/data/CCBR_Pipeliner/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
-  gencodepath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
-  refseqpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
-  canonicalpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
-  intronpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
-  rmskpath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
-  aliaspath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
-  additionalannopath: '/data/CCBR_Pipeliner/iCLIP/ref/annotations/mm10/additional_anno/'
+  stardir: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/mm10/index'
+  stargtf: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
+  gencodepath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
+  refseqpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
+  canonicalpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
+  intronpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
+  rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
+  aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
+  additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/additional_anno/'
 
 #########################################################################################
 # Manifests
@@ -103,7 +105,7 @@ demultiplex:
 # STAR parameters
 #########################################################################################
 STAR:
-  threads: 32
+  threads: 12
   alignEndsType: "Local" #type of read ends alignment ["Local", "EndToEnd", "Extend5pOfRead1", "Extend5pOfReads12"]
   alignIntronMax: 50000 #maximum intron length
   alignSJDBoverhangMin: 3 # minimum overhang value for annotated spliced junctions
@@ -139,14 +141,14 @@ STAR:
 #########################################################################################
 
 featureCounts:
-  threads: '8'
+  threads: '12'
 
 #########################################################################################
 # QC_Screen_Validator parameters
 #########################################################################################
 
 QC_Screen_Validator:
-  threads: '8'
+  threads: '64'
 
 #########################################################################################
 # CTK parameters
@@ -154,3 +156,5 @@ QC_Screen_Validator:
 
 CTK:
   minimum_peak_height: 5
+
+

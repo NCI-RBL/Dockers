@@ -1,4 +1,4 @@
-# AnnotationFormat.py
+# MANORM_AnnotationFormat.py
 
 __author__ = 'Wilfried Guiblet'
 
@@ -55,7 +55,7 @@ def CombineTypes(row):
 def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df):
 
     # Create empty dataframe
-    Out_df = pd.DataFrame(columns = ['ID', 'chrom', 'start', 'end', 'score', 'strand', 'Length', 'Counts_Unique', 'Counts_fracMM', 'Counts_Total',\
+    Out_df = pd.DataFrame(columns = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
                                  'Same_ensembl_gene_id',   'Same_external_gene_name',    'Same_gene_type',\
                                  'Same_transcript_type',   'Same_transcript_name',       'Same_feature',\
                                  'Same_exon_number',       'Same_intron_number',         'Same_intron_Overlap',\
@@ -66,15 +66,15 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
                                  'Oppo_exon_Overlap',      'Oppo_Repeat',                'Oppo_ncRNA',           'Oppo_Comb_type'])
 
 
-    SameStrandMerged_df = SameStrandGen_df.merge(SameStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
-    SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandRMSK_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
-    SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
+    SameStrandMerged_df = SameStrandGen_df.merge(SameStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
+    SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandRMSK_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
+    SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
 
-    OppoStrandMerged_df = OppoStrandGen_df.merge(OppoStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
-    OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandRMSK_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
-    OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
+    OppoStrandMerged_df = OppoStrandGen_df.merge(OppoStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
+    OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandRMSK_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
+    OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
     
-    Out_df[['ID', 'chrom', 'start', 'end', 'score', 'strand', 'Length', 'Counts_Unique', 'Counts_fracMM','Counts_Total']] = SameStrandMerged_df[['ID', 'chrom', 'start', 'end', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total']]
+    Out_df[['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background']] = SameStrandMerged_df[['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background']]
     Out_df['Same_ensembl_gene_id'] = SameStrandMerged_df['gene_id']
     Out_df['Same_external_gene_name'] = SameStrandMerged_df['gene_name']
     Out_df['Same_gene_type'] = SameStrandMerged_df['gene_type']
@@ -106,9 +106,8 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     return(Out_df)
 
 def ProcessGencode(InputFile):
-
     Gen_df = pd.read_csv(InputFile, sep = '\t', header = None,\
-                names = ['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total',\
+                names = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
                          'genChrom', 'genStart', 'genEnd', 'Source', 'genScore', 'genStrand', 'feature', 'frame',\
                          'gene_id', 'gene_type', 'gene_name', 'level', 'mgi_id', 'havana_gene', 'transcript_id',\
                          'transcript_type', 'transcript_name', 'transcript_support_level', 'tag', 'havana_transcript',\
@@ -119,17 +118,17 @@ def ProcessGencode(InputFile):
 
     # Aggregate reads found in multiple entries
     # https://stackoverflow.com/questions/36271413/pandas-merge-nearly-duplicate-rows-based-on-column-value
-    Gen_df = Gen_df.groupby(['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM',\
-                     'counts_total']).agg({'genChrom'          : ', '.join, 'genStart'          : ', '.join, 'genEnd'                   : ', '.join,
-                                           'Source'            : ', '.join, 'genScore'          : ', '.join, 'genStrand'                : ', '.join,
-                                           'feature'           : ', '.join, 'frame'             : ', '.join, 'gene_id'                  : ', '.join,
-                                           'gene_type'         : ', '.join, 'gene_name'         : ', '.join, 'level'                    : ', '.join,
-                                           'mgi_id'            : ', '.join, 'havana_gene'       : ', '.join, 'transcript_id'            : ', '.join,
-                                           'transcript_type'   : ', '.join, 'transcript_name'   : ', '.join, 'transcript_support_level' : ', '.join,
-                                           'tag'               : ', '.join, 'havana_transcript' : ', '.join, 'exon_number'              : ', '.join,
-                                           'exon_id'           : ', '.join, 'protein_id'        : ', '.join, 'ccdsid'                   : ', '.join,
-                                           'ont'               : ', '.join, 'genOverlap'        : '; '.join 
-                                           }).reset_index()
+    Gen_df = Gen_df.groupby(['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group','normalized_read_density_sample',\
+                             'normalized_read_density_background']).agg({   'genChrom'          : ', '.join, 'genStart'          : ', '.join, 'genEnd'                   : ', '.join,
+                                                                            'Source'            : ', '.join, 'genScore'          : ', '.join, 'genStrand'                : ', '.join,
+                                                                            'feature'           : ', '.join, 'frame'             : ', '.join, 'gene_id'                  : ', '.join,
+                                                                            'gene_type'         : ', '.join, 'gene_name'         : ', '.join, 'level'                    : ', '.join,
+                                                                            'mgi_id'            : ', '.join, 'havana_gene'       : ', '.join, 'transcript_id'            : ', '.join,
+                                                                            'transcript_type'   : ', '.join, 'transcript_name'   : ', '.join, 'transcript_support_level' : ', '.join,
+                                                                            'tag'               : ', '.join, 'havana_transcript' : ', '.join, 'exon_number'              : ', '.join,
+                                                                            'exon_id'           : ', '.join, 'protein_id'        : ', '.join, 'ccdsid'                   : ', '.join,
+                                                                            'ont'               : ', '.join, 'genOverlap'        : '; '.join 
+                                                                            }).reset_index()
 
     # Remove duplicate terms in cells, remove 'nan'
     Gen_df.iloc[:, 10:] = Gen_df.iloc[:, 10:].applymap(lambda x: ', '.join(set(x.strip().replace(' ', '').replace('nan,', '').replace('nan', '').split(','))))
@@ -137,19 +136,18 @@ def ProcessGencode(InputFile):
 
 
 def ProcessIntrons(InputFile):
-
     Introns_df = pd.read_csv(InputFile, sep = '\t', header = None,\
-                names = ['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total',\
+                names = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
                          'intronChrom', 'intronStart', 'intronEnd', 'intronID', 'intronScore', 'intronStrand', 'intronOverlap', 'intron_number'])
 
     #Introns_df = Introns_df.astype('str') # change type necessary for aggregate
     Introns_df.iloc[:, 10:] = Introns_df.iloc[:, 10:].astype('str') # change type necessary for aggregate
    
     # https://stackoverflow.com/questions/36271413/pandas-merge-nearly-duplicate-rows-based-on-column-value
-    Introns_df = Introns_df.groupby(['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM',\
-                     'counts_total']).agg({'intronChrom'   : ', '.join, 'intronStart'   : ', '.join, 'intronEnd'    : ', '.join,
-                                           'intronID'      : ', '.join, 'intronScore'   : ', '.join, 'intronStrand' : ', '.join,
-                                           'intronOverlap' : ', '.join, 'intron_number' : ', '.join }).reset_index()
+    Introns_df = Introns_df.groupby(['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group','normalized_read_density_sample',\
+                                     'normalized_read_density_background']).agg({'intronChrom'   : ', '.join, 'intronStart'   : ', '.join, 'intronEnd'    : ', '.join,
+                                                                                 'intronID'      : ', '.join, 'intronScore'   : ', '.join, 'intronStrand' : ', '.join,
+                                                                                 'intronOverlap' : ', '.join, 'intron_number' : ', '.join }).reset_index()
 
     # Remove duplicate terms in cells, remove 'nan'
     Introns_df.iloc[:, 10:] = Introns_df.iloc[:, 10:].applymap(lambda x: ', '.join(set(x.strip().replace(' ', '').replace('nan,', '').replace('nan', '').split(','))))
@@ -157,19 +155,18 @@ def ProcessIntrons(InputFile):
 
 
 def ProcessRMSK(InputFile):
-
     RMSK_df = pd.read_csv(InputFile, sep = '\t', header = None, \
-                names = ['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total',\
+                names = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
                          'repChrom', 'repStart', 'repEnd', 'repName', 'repClass', 'repStrand', 'repFamily', 'repOverlap'])
 
     #RMSK_df = RMSK_df.astype('str') # change type necessary for aggregate
     RMSK_df.iloc[:, 10:] = RMSK_df.iloc[:, 10:].astype('str') # change type necessary for aggregate
 
     # https://stackoverflow.com/questions/36271413/pandas-merge-nearly-duplicate-rows-based-on-column-value
-    RMSK_df = RMSK_df.groupby(['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM',\
-                               'counts_total']).agg({'repStart'  : ', '.join, 'repEnd'   : ', '.join, 'repName' : ', '.join,
-                                                     'repClass'  : ', '.join, 'repStrand': ', '.join, 'repFamily': ', '.join,
-                                                     'repOverlap': ', '.join,}).reset_index()
+    RMSK_df = RMSK_df.groupby(['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group','normalized_read_density_sample',\
+                               'normalized_read_density_background']).agg({ 'repStart'  : ', '.join, 'repEnd'   : ', '.join, 'repName' : ', '.join,
+                                                                            'repClass'  : ', '.join, 'repStrand': ', '.join, 'repFamily': ', '.join,
+                                                                            'repOverlap': ', '.join,}).reset_index()
 
     # Remove duplicate terms in cells, remove 'nan'
     RMSK_df.iloc[:, 10:] = RMSK_df.iloc[:, 10:].applymap(lambda x: ', '.join(set(x.strip().replace(' ', '').replace('nan,', '').replace('nan', '').split(','))))
@@ -177,18 +174,18 @@ def ProcessRMSK(InputFile):
 
 
 def ProcessNCRNA(InputFile):
-
     NCRNA_df = pd.read_csv(InputFile, sep = '\t', header = None, \
-                names = ['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total',\
-                         'ncrnaChrom', 'ncrnaStart', 'ncrnaEnd', 'ncrnaName', 'ncrnaClass', 'ncrnaStrand', 'ncrnaOverlap'])
+                names = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample',\
+                         'normalized_read_density_background', 'ncrnaChrom', 'ncrnaStart', 'ncrnaEnd', 'ncrnaName', 'ncrnaClass', 'ncrnaStrand', 'ncrnaOverlap'])
 
     #RMSK_df = RMSK_df.astype('str') # change type necessary for aggregate
     NCRNA_df.iloc[:, 10:] = NCRNA_df.iloc[:, 10:].astype('str') # change type necessary for aggregate
 
     # https://stackoverflow.com/questions/36271413/pandas-merge-nearly-duplicate-rows-based-on-column-value
-    NCRNA_df = NCRNA_df.groupby(['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM',\
-                               'counts_total']).agg({'ncrnaStart'  : ', '.join, 'ncrnaEnd'   : ', '.join, 'ncrnaName' : ', '.join,
-                                                     'ncrnaClass'  : ', '.join, 'ncrnaStrand': ', '.join, 'ncrnaOverlap': ', '.join,}).reset_index()
+    NCRNA_df = NCRNA_df.groupby(['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group','normalized_read_density_sample',\
+                                 'normalized_read_density_background']).agg({  'ncrnaChrom'  : ', '.join, 'ncrnaStart': ', '.join, 'ncrnaEnd'   : ', '.join,
+                                                                                'ncrnaName'   : ', '.join, 'ncrnaClass': ', '.join, 'ncrnaStrand': ', '.join,
+                                                                                'ncrnaOverlap': ', '.join,}).reset_index()
 
     # Remove duplicate terms in cells, remove 'nan'
     NCRNA_df.iloc[:, 10:] = NCRNA_df.iloc[:, 10:].applymap(lambda x: ', '.join(set(x.strip().replace(' ', '').replace('nan,', '').replace('nan', '').split(','))))

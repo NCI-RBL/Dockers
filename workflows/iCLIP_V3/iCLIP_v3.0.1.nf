@@ -62,6 +62,21 @@ process Create_Project_Annotations {
     """
     Generate annotation table once per project.
     Generate BED files of annotations.
+
+
+    NCRNA Annotation:
+    source	contents	description
+    yRNA	Repeatmasker	HY1, HY4, HY3, HY5	 subset of scRNA
+    snRNA	Gencode	U1,U2,U5,U6,U7,U11,U12 and various predicted genes	small nuclear RNA : Small RNA molecules that are found in the cell nucleus and are involved in the processing of pre messenger RNAs
+    snoRNA	Gencode	snoRNA	Small nucleolar RNAs : Small RNA molecules that are found in the cell nucleolus and are involved in the post-transcriptional modification of other RNAs
+    srpRNA	Repeatmasker	7SLRNA	signal recognition particle RNA; can be (7SL, 6S, or 4.5S RNA) 4.5S is coveredin scRNA
+    tRNA	Custom		transfer RNA, which acts as an adaptor molecule for translation of mRNA.
+    7SK RNA	Repeatmasker	7SK	subset of small nuclear RNA and part of the small nuclear ribonucleoprotein complex (snRNP)
+    scRNA	Repeatmasker	BC1_Mm, 4.5SRNA	Small cytoplasmic RNA; remove yRNA
+    miRNA	Gencode	miRNA	Micro RNA : A small RNA (~22bp) that silences the expression of target mRNA
+    NA	NA	NA	NA
+    lncRNA	Gencode	retained_intron, lncRNA, misc_RNA, processed_pseudogene	long non-coding RNA type with Intronic + Exonic Regions
+
     """
 
     container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
@@ -74,18 +89,18 @@ process Create_Project_Annotations {
 
     shell:
         """
-        Rscript !{params.sourcedir}/04_annotation.R \\
-          --ref_species !{params.reference} \\
-          --refseq_rRNA !{params.rrna_flag} \\
-          --alias_path !{params."${params.reference}".aliaspath} \\
-          --gencode_path !{params."${params.reference}".gencodepath} \\
-          --refseq_path !{params."${params.reference}".refseqpath} \\
-          --canonical_path !{params."${params.reference}".can_path} \\
-          --intron_path !{params."${params.reference}".intronpath} \\
-          --rmsk_path !{params."${params.reference}".rmskpath} \\
-          --custom_path !{params."${params.reference}".additionalannopath} \\
-          --out_dir !{params.workdir}/04_annotation/01_project/ \\
-          --reftable_path !{params.sourcedir}/annotation_config.txt 
+        #Rscript !{params.sourcedir}/04_annotation.R \\
+        #  --ref_species !{params.reference} \\
+        #  --refseq_rRNA !{params.rrna_flag} \\
+        #  --alias_path !{params."${params.reference}".aliaspath} \\
+        #  --gencode_path !{params."${params.reference}".gencodepath} \\
+        #  --refseq_path !{params."${params.reference}".refseqpath} \\
+        #  --canonical_path !{params."${params.reference}".can_path} \\
+        #  --intron_path !{params."${params.reference}".intronpath} \\
+        #  --rmsk_path !{params."${params.reference}".rmskpath} \\
+        #  --custom_path !{params."${params.reference}".additionalannopath} \\
+        #  --out_dir !{params.workdir}/04_annotation/01_project/ \\
+        #  --reftable_path !{params.sourcedir}/annotation_config.txt 
 
         awk -v OFS='\t' '(NR>1) {print \$6, \$7, \$8, \$11, \$12, \$10, \$13}' !{params."${params.reference}".rmskpath} \\
              > !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed
@@ -93,6 +108,14 @@ process Create_Project_Annotations {
            \$17, \$18, \$19, \$20, \$21, \$22, \$23, \$24, \$25}' !{params."${params.reference}".gencodepath} \\
              > !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed
         cp !{params."${params.reference}".intronpath} !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed
+
+        awk -v OFS='\t' '{if (\$4 ~ /HY/ || \$4 == "7SK") print \$1, \$2, \$3, \$4, \$5, \$6}' !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed > !{params.workdir}/04_annotation/01_project/ncRNA.bed
+        awk -v OFS='\t' '{if (\$4 !~ /HY/ && \$5 == "scRNA") print \$1, \$2, \$3, "other_scRNA", \$4, \$6}' !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
+        awk -v OFS='\t' '{if (\$5 == "srpRNA") print \$1, \$2, \$3, \$5, \$4, \$6}' !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
+        awk -v OFS='\t' '{if (\$10 == "snRNA" || \$10 == "snoRNA" || \$10 == "miRNA" || \$10 == "misc_RNA") print \$1, \$2, \$3, \$10, \$5, \$6}' !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
+        cat !{params."${params.reference}".additionalannopath}/"${params.reference}"_tRNA.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
+        awk -v OFS='\t' '{print \$1, \$2, \$3, "rRNA", \$4, \$6 }' !{params."${params.reference}".additionalannopath}/"${params.reference}"_rRNA.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
+
         """
 }
 
@@ -564,7 +587,7 @@ process Create_Safs {
     shell:
         """
         set -exo pipefail
-        awk '{{OFS="\\t"; print \$1":"\$2"-"\$3"_"\$6,\$1,\$2,\$3,\$6}}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/03_peaks/02_SAF/!{samplefile}.saf
+        awk '{{OFS="\\t"; if (\$3-\$2 >= 20) print \$1":"\$2"-"\$3"_"\$6,\$1,\$2,\$3,\$6}}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/03_peaks/02_SAF/!{samplefile}.saf
         """
 }
 
@@ -680,13 +703,19 @@ process Peak_Annotation {
         bedtools intersect -s -wao \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
           -b !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed \\
-          | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$14, arr, "_"); \$18 = arr[3]} \$14 == "." { \$18 = "." } 1' \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
           -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed \\
+          | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$14, arr, "_"); \$18 = arr[3]} \$14 == "." { \$18 = "." } 1' \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed
+
+        bedtools intersect -s -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.ncRNA.!{params.reference}.intersect.SameStrand.bed
+
 
 
         bedtools intersect -S -wao \\
@@ -705,16 +734,23 @@ process Peak_Annotation {
           | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$14, arr, "_"); \$18 = arr[3]} \$14 == "." { \$18 = "." } 1' \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed
 
+        bedtools intersect -S -wao \\
+          -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
+          -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
+            > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.ncRNA.!{params.reference}.intersect.OppoStrand.bed
 
+
+        #python !{params.workdir}/AnnotationFormat.py \\
         python !{params.sourcedir}/AnnotationFormat.py \\
           --SameStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandIntrons !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed \\
+          --SameStrandncRNA !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.ncRNA.!{params.reference}.intersect.SameStrand.bed \\
           --OppoStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.OppoStrand.bed \\
           --OppoStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.OppoStrand.bed \\
           --OppoStrandIntrons !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed \\
+          --OppoStrandncRNA !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.ncRNA.!{params.reference}.intersect.OppoStrand.bed \\
           --Output !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt
-
         """
 }
 
@@ -724,7 +760,7 @@ process Annotation_Report {
     generates an HTML report for peak annotations
     """
 
-    //container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
 
     input:
         val samplefile
@@ -734,17 +770,41 @@ process Annotation_Report {
 
     shell:
         """
-        echo 'boom'
-        #Rscript -e 'library(rmarkdown); \
-        #rmarkdown::render("!{params.workdir}/06_annotation.Rmd", \
-        #    output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
-        #    params= list(samplename = "!{samplefile}", \
-        #        peak_in = "!{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt", \
-        #        output_table = "!{params.workdir}/04_annotation/!{samplefile}_annotation_!{params.peakid}readPeaks_final_table.txt", \
-        #        readdepth = "!{params.mincount}", \
-        #        PeakIdnt = "!{params.peakid}"))'
+        #echo 'boom'
+        Rscript -e 'library(rmarkdown); \
+        rmarkdown::render("!{params.sourcedir}/06_annotation.Rmd", \
+            output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
+            params= list(samplename = "!{samplefile}", \
+                NCRNA_annotation = "!{params.workdir}/04_annotation/01_project/", \
+                peak_in = "!{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt", \
+                output_table = "!{params.workdir}/04_annotation/!{samplefile}_annotation_!{params.peakid}readPeaks_final_table.txt", \
+                peak_heigth = "!{params.CTK.minimum_peak_height}", \
+                PeakIdnt = "!{params.peakid}"))'
         """        
 
+}
+
+
+process SplitByStrand {
+    """
+    Slit read and peak files by strand
+    """
+
+    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+
+    input:
+        val samplefile
+
+    output:
+        val(samplefile)
+
+    shell:
+        """
+        awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
+        awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.reads.pos.bed
+        awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
+        awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.reads.neg.bed
+        """
 }
 
 process MANORM_analysis {
@@ -760,10 +820,10 @@ process MANORM_analysis {
     shell:
         """
         manorm \\
-            --p1 "!{params.workdir}/03_peaks/01_bed/!{sample}.peaks.boundary.bed" \\
-            --p2 "!{params.workdir}/03_peaks/01_bed/!{background}.peaks.boundary.bed" \\
-            --r1 "!{params.workdir}/03_peaks/01_bed/!{sample}.bed" \\
-            --r2 "!{params.workdir}/03_peaks/01_bed/!{background}.bed" \\
+            --p1 "!{params.workdir}/05_demethod/02_analysis/!{sample}.peaks.pos.bed" \\
+            --p2 "!{params.workdir}/05_demethod/02_analysis/!{background}.peaks.pos.bed" \\
+            --r1 "!{params.workdir}/05_demethod/02_analysis/!{sample}.reads.pos.bed" \\
+            --r2 "!{params.workdir}/05_demethod/02_analysis/!{background}.reads.pos.bed" \\
             --s1 0 \\
             --s2 0 \\
             -p 1 \\
@@ -771,29 +831,31 @@ process MANORM_analysis {
             -w !{params.manorm_w} \\
             --summit-dis !{params.manorm_d} \\
             --wa \\
-            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background} \\
+            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos \\
             --name1 !{sample} \\
             --name2 !{background}
 
+        awk -v OFS='\t' '{print \$1,\$2,\$3,\$4}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos/output_filters/!{sample}_vs_!{background}_M_above_0.0_biased_peaks.bed > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos.manorm.xls
 
-        awk -v OFS='\t' '{print \$1,\$2,\$3,\$4}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}/output_filters/!{sample}_M_above_0.0_biased_peaks.bed > !{params.workdir}/05_demethod/02_analysis/!{sample}.manorm.bed
 
-        
-        # rename MANORM final output file
-        #mv {params.base}{wildcards.group_id}_all_MAvalues.xls {output.mavals}
+        manorm \\
+            --p1 "!{params.workdir}/05_demethod/02_analysis/!{sample}.peaks.neg.bed" \\
+            --p2 "!{params.workdir}/05_demethod/02_analysis/!{background}.peaks.neg.bed" \\
+            --r1 "!{params.workdir}/05_demethod/02_analysis/!{sample}.reads.neg.bed" \\
+            --r2 "!{params.workdir}/05_demethod/02_analysis/!{background}.reads.neg.bed" \\
+            --s1 0 \\
+            --s2 0 \\
+            -p 1 \\
+            -m 0 \\
+            -w !{params.manorm_w} \\
+            --summit-dis !{params.manorm_d} \\
+            --wa \\
+            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_neg \\
+            --name1 !{sample} \\
+            --name2 !{background}
 
-        # rename individual file names for each sample
-        #mv {params.base}{params.gid_1}_MAvalues.xls {params.base}{params.gid_1}_{params.peak_id}readPeaks_MAvalues.xls
-        #mv {params.base}{params.gid_2}_MAvalues.xls {params.base}{params.gid_2}_{params.peak_id}readPeaks_MAvalues.xls
-
-        # mv folders of figures, filters, tracks to new location
-        # remove folders if they already exist
-        #if [[ -d {params.base}output_figures_{params.peak_id}readPeaks ]]; then rm -r {params.base}output_figures_{params.peak_id}readPeaks; fi
-        #if [[ -d {params.base}output_filters_{params.peak_id}readPeaks ]]; then rm -r {params.base}output_filters_{params.peak_id}readPeaks; fi
-        #if [[ -d {params.base}output_tracks_{params.peak_id}readPeaks ]]; then rm -r {params.base}output_tracks_{params.peak_id}readPeaks; fi
-        #mv {params.base}output_figures {params.base}output_figures_{params.peak_id}readPeaks
-        #mv {params.base}output_filters {params.base}output_filters_{params.peak_id}readPeaks
-        #mv {params.base}output_tracks {params.base}output_tracks_{params.peak_id}readPeaks
+        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3_pos/Y1KO_Clip3_vs_Control_Clip3_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3.bed
+        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3_neg/Y1KO_Clip3_vs_Control_Clip3_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3.bed
         """    
 
 }
@@ -811,68 +873,76 @@ process Manorm_Report {
     shell:
         """
         set -exo pipefail
-        
-        ### for sample vs Bg compairson
-        featureCounts -F SAF \\
-            -a out_dir,'03_peaks','02_SAF','{gid_1}_' + peak_id + 'readPeaks.SAF' \\
-            -O \\
-            --fraction \\
-            --minOverlap 1 \\
-            -s 1 \\
-            -T {threads} \\
-            -o {output.bkUniqcountsmplPk} \\
-            {params.bkbam}
-        featureCounts -F SAF \\
-            -a {params.smplSAF} \\
-            -M \\
-            -O \\
-            --fraction \\
-            --minOverlap 1 \\
-            -s 1 \\
-            -T {threads} \\
-            -o {output.bkMMcountsmplPk} \\
-            {params.bkbam}
-        Rscript {params.script} \\
-            --samplename {params.gid_1} \\
-            --background {params.gid_2} \\
-            --peak_anno_g1 {params.anno_dir}/{params.gid_1}_annotation_{params.peak_id}readPeaks_final_table.txt \\
-            --peak_anno_g2 {params.anno_dir}/{params.gid_2}_annotation_{params.peak_id}readPeaks_final_table.txt \\
-            --Smplpeak_bkgroundCount_MM {output.bkMMcountsmplPk} \\
-            --Smplpeak_bkgroundCount_unique {output.bkUniqcountsmplPk} \\
-            --pos_manorm {params.de_dir}/{wildcards.group_id}/{wildcards.group_id}_P/{params.gid_1}_{params.peak_id}readPeaks_MAvalues.xls \\
-            --neg_manorm {params.de_dir}/{wildcards.group_id}/{wildcards.group_id}_N/{params.gid_1}_{params.peak_id}readPeaks_MAvalues.xls \\
-            --output_file {output.post_proc}
-        
-        ### for Bg vs sample compairson
-        featureCounts -F SAF \\
-            -a {params.bkSAF} \\
-            -O \\
-            --fraction \\
-            --minOverlap 1 \\
-            -s 1 \\
-            -T {threads} \\
-            -o {output.smplUniqcountbkPk} \\
-            {params.smplbam}
-        featureCounts -F SAF \\
-            -a {params.bkSAF} \\
-            -M \\
-            -O \\
-            --fraction \\
-            --minOverlap 1 \\
-            -s 1 \\
-            -T {threads} \\
-            -o {output.smplMMcountbkPk} \\
-            {params.smplbam}
-        Rscript {params.script} \\
-            --samplename {params.gid_2} \\
-            --background {params.gid_1} \\
-            --peak_anno_g1 {params.anno_dir}/{params.gid_2}_annotation_{params.peak_id}readPeaks_final_table.txt \\
-            --peak_anno_g2 {params.anno_dir}/{params.gid_1}_annotation_{params.peak_id}readPeaks_final_table.txt \\
-            --Smplpeak_bkgroundCount_MM {output.smplMMcountbkPk} \\
-            --Smplpeak_bkgroundCount_unique {output.smplUniqcountbkPk} \\
-            --pos_manorm {params.de_dir}/{wildcards.group_id}/{wildcards.group_id}_P/{params.gid_2}_{params.peak_id}readPeaks_MAvalues.xls \\
-            --neg_manorm {params.de_dir}/{wildcards.group_id}/{wildcards.group_id}_N/{params.gid_2}_{params.peak_id}readPeaks_MAvalues.xls \\
-            --output_file {output.post_procRev}
+
+        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos/!{sample}_vs_!{background}_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
+        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_neg/!{sample}_vs_!{background}_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
+
+        bedtools intersect -s -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed
+
+        bedtools intersect -s -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed
+
+        bedtools intersect -s -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
+        | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed
+
+        bedtools intersect -s -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.SameStrand.bed
+
+
+        bedtools intersect -S -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.OppoStrand.bed
+
+        bedtools intersect -S -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed
+
+        bedtools intersect -S -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
+        | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed
+
+        bedtools intersect -S -wao \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed
+
+        #python !{params.workdir}/AnnotationFormat.py \\
+        python !{params.sourcedir}/AnnotationFormat.py \\
+        --SameStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed \\
+        --SameStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed \\
+        --SameStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed \\
+        --SameStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.SameStrand.bed \\
+        --OppoStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.OppoStrand.bed \\
+        --OppoStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed \\
+        --OppoStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed \\
+        --OppoStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed \\
+        --Output !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt        
+
+        Rscript -e 'library(rmarkdown); \
+        rmarkdown::render("!{params.workdir}/08_MANORM_Report.Rmd", \
+            output_file = "!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_report.html", \
+            params= list(peak_in="!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt", \
+                PeakIdnt="!{params.peakid}",\
+                samplename="!{sample}}", \
+                background="!{background}", \
+                pval="!{params.MANormPValue}", \
+                FC="", \
+                incd_rRNA="T"\
+                ))'
         """
 
 }
@@ -886,14 +956,16 @@ workflow {
     QC_Barcode(rawfiles_tuple) | Demultiplex
 
     samplefiles_tuple = Demultiplex.out.combine(samplefiles_ch)
-    Star(samplefiles_tuple) | Index_Stats | Check_ReadCounts | DeDup | Remove_Spliced_Reads | CTK_Peak_Calling | Create_Safs | Feature_Counts | CombineCounts
 
-    FastQC(samplefiles_tuple) | QC_Screen_Validator 
-    MultiQC(QC_Screen_Validator.out.unique())
+    FastQC(samplefiles_tuple) | QC_Screen_Validator
+
+    MultiQC(QC_Screen_Validator.out.collect().toList().unique())
+
+    Star(samplefiles_tuple) | Index_Stats | Check_ReadCounts | DeDup | Remove_Spliced_Reads | CTK_Peak_Calling | Create_Safs | Feature_Counts | CombineCounts | SplitByStrand
 
     Peak_Annotation(CombineCounts.out) | Annotation_Report
 
-    MANORM_analysis(contrasts_ch.combine(Peak_Annotation.out.collect().toList()))
+    MANORM_analysis(contrasts_ch.combine(SplitByStrand.out.collect().toList())) | Manorm_Report
 
 
 }
