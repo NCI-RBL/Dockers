@@ -556,7 +556,7 @@ process CTK_Peak_Calling {
 
         """
         export PERL5LIB=/opt/conda/lib/czplib
-        bedtools bamtobed -i !{params.workdir}/02_bam/02_dedup/!{samplefile}.filtered.bam > /data2/03_peaks/01_bed/!{samplefile}.bed
+        bedtools bamtobed -i !{params.workdir}/02_bam/02_dedup/!{samplefile}.filtered.bam > !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed
 
         /opt/conda/lib/ctk/tag2peak.pl \
         -big -ss \
@@ -567,7 +567,7 @@ process CTK_Peak_Calling {
         --out-boundary !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed \
         --out-half-PH !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.halfPH.bed \
         --multi-test \
-        -minPH {!params.CTK.minimum_peak_height}
+        -minPH !{params.CTK.minimum_peak_height}
         """
 }
 
@@ -740,7 +740,7 @@ process Peak_Annotation {
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.ncRNA.!{params.reference}.intersect.OppoStrand.bed
 
 
-        #python !{params.workdir}/AnnotationFormat.py \\
+        #python !{params.sourcedir}/AnnotationFormat.py \\
         python !{params.sourcedir}/AnnotationFormat.py \\
           --SameStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed \\
@@ -771,14 +771,14 @@ process Annotation_Report {
     shell:
         """
         #echo 'boom'
-        Rscript -e 'library(rmarkdown); \
+        /opt/conda/bin/Rscript -e 'library(rmarkdown); \
         rmarkdown::render("!{params.sourcedir}/06_annotation.Rmd", \
             output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
             params= list(samplename = "!{samplefile}", \
                 NCRNA_annotation = "!{params.workdir}/04_annotation/01_project/", \
                 peak_in = "!{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_annotation_complete.txt", \
                 output_table = "!{params.workdir}/04_annotation/!{samplefile}_annotation_!{params.peakid}readPeaks_final_table.txt", \
-                peak_heigth = "!{params.CTK.minimum_peak_height}", \
+                peak_height = "!{params.CTK.minimum_peak_height}", \
                 PeakIdnt = "!{params.peakid}"))'
         """        
 
@@ -854,8 +854,8 @@ process MANORM_analysis {
             --name1 !{sample} \\
             --name2 !{background}
 
-        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3_pos/Y1KO_Clip3_vs_Control_Clip3_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3.bed
-        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3_neg/Y1KO_Clip3_vs_Control_Clip3_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/Y1KO_Clip3_vs_Control_Clip3.bed
+        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos/!{sample}_vs_!{background}_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
+        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_neg/!{sample}_vs_!{background}_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
         """    
 
 }
@@ -874,49 +874,95 @@ process Manorm_Report {
         """
         set -exo pipefail
 
-        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos/!{sample}_vs_!{background}_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
-        awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_neg/!{sample}_vs_!{background}_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
+        #awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos/!{sample}_vs_!{background}_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
+        #awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_neg/!{sample}_vs_!{background}_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
+
+        awk '{{OFS="\\t"; if (\$3-\$2 >= 20) print \$1":"\$2"-"\$3"_"\$6,\$1,\$2,\$3,\$6}}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.saf
+
+        featureCounts -F SAF \\
+            -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.saf \\
+            -O \\
+            -J \\
+            --fraction \\
+            --minOverlap 1 \\
+            -s 1 \\
+            -T !{params.featureCounts.threads} \\
+            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadpeaks_uniqueCounts.txt \\
+            !{params.workdir}/02_bam/02_dedup/!{sample}.filtered.bam;
+
+        featureCounts -F SAF \\
+            -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.saf \\
+            -M \\
+            -O \\
+            -J \\
+            --fraction \\
+            --minOverlap 1 \\
+            -s 1 \\
+            -T !{params.featureCounts.threads} \\
+            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadpeaks_FracMMCounts.txt \\
+            !{params.workdir}/02_bam/02_dedup/!{sample}.filtered.bam;
+
+        featureCounts -F SAF \\
+            -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.saf \\
+            -M \\
+            -O \\
+            --minOverlap 1 \\
+            -s 1 \\
+            -T !{params.featureCounts.threads} \\
+            -o !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadpeaks_totalCounts.txt \\
+            !{params.workdir}/02_bam/02_dedup/!{sample}.filtered.bam;
+
+        python !{params.sourcedir}/05_countmerger.py \\
+                    --uniqueCountsFile !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadpeaks_uniqueCounts.txt \\
+                    --FracMMCountsFile !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadpeaks_FracMMCounts.txt \\
+                    --totalCountsFile !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadpeaks_totalCounts.txt \\
+                    --outName !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.txt
+
+        awk -v OFS='\\t' '(NR>1) {print \$2, \$3, \$4, \$1, 0, \$5, \$6, \$7, \$8, \$9 }' \\
+          !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.txt \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed
+
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
         | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.SameStrand.bed
 
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
         | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed
 
@@ -933,7 +979,7 @@ process Manorm_Report {
         --Output !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt        
 
         Rscript -e 'library(rmarkdown); \
-        rmarkdown::render("!{params.workdir}/08_MANORM_Report.Rmd", \
+        rmarkdown::render("!{params.sourcedir}/08_MANORM_Report.Rmd", \
             output_file = "!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_report.html", \
             params= list(peak_in="!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt", \
                 PeakIdnt="!{params.peakid}",\

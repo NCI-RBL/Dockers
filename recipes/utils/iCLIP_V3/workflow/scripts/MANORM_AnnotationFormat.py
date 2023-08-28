@@ -52,7 +52,7 @@ def CombineTypes(row):
 
 
 
-def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df):
+def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, Counts_df):
 
     # Create empty dataframe
     Out_df = pd.DataFrame(columns = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
@@ -75,6 +75,10 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
     
     Out_df[['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background']] = SameStrandMerged_df[['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background']]
+    #print(Out_df.dtypes)
+    #print(Counts_df.dtypes)
+    Out_df = Out_df.merge(Counts_df, how='left', on=['chrom', 'start', 'end', 'strand'])
+
     Out_df['Same_ensembl_gene_id'] = SameStrandMerged_df['gene_id']
     Out_df['Same_external_gene_name'] = SameStrandMerged_df['gene_name']
     Out_df['Same_gene_type'] = SameStrandMerged_df['gene_type']
@@ -103,11 +107,12 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
 
     Out_df = Out_df.apply(CombineTypes, axis=1)
 
+
     return(Out_df)
 
 def ProcessGencode(InputFile):
     Gen_df = pd.read_csv(InputFile, sep = '\t', header = None,\
-                names = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
+                names = ['chrom', 'start', 'end', 'type', 'score', 'strand',  'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
                          'genChrom', 'genStart', 'genEnd', 'Source', 'genScore', 'genStrand', 'feature', 'frame',\
                          'gene_id', 'gene_type', 'gene_name', 'level', 'mgi_id', 'havana_gene', 'transcript_id',\
                          'transcript_type', 'transcript_name', 'transcript_support_level', 'tag', 'havana_transcript',\
@@ -192,6 +197,13 @@ def ProcessNCRNA(InputFile):
     return(NCRNA_df)
 
 
+def ProcessCounts(InputFile):
+    Counts_df = pd.read_csv(InputFile, sep = '\t', header = 0)
+    #Counts_df = Counts_df.astype('str')
+    Counts_df = Counts_df.rename(columns={"chr": "chrom"})
+    return(Counts_df)
+
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -203,6 +215,7 @@ def main():
     parser.add_argument('--OppoStrandGenCode', type=str, required=True)
     parser.add_argument('--OppoStrandIntrons', type=str, required=True)
     parser.add_argument('--OppoStrandncRNA', type=str, required=True)
+    parser.add_argument('--Counts', type=str, required=True)
     parser.add_argument('--Output', type=str, required=True)
 
 
@@ -217,7 +230,9 @@ def main():
     OppoStrandIntrons_df = ProcessIntrons(args.OppoStrandIntrons)
     OppoStrandNCRNA_df = ProcessNCRNA(args.OppoStrandncRNA)
 
-    Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df)
+    Counts_df = ProcessCounts(args.Counts)
+
+    Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, Counts_df)
     Out_df.to_csv(args.Output, sep = '\t', index=False)
 
 if __name__ == '__main__':

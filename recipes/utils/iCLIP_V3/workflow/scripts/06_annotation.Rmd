@@ -6,7 +6,7 @@ params: # Need to be set to be superseded
   samplename: ""
   peak_in: ""
   output_table: ""
-  peak_heigth: 3
+  peak_height: 3
   PeakIdnt: "ALL" #MultiMap, Unique, all
   NCRNA_annotation: ""
 ---
@@ -18,33 +18,32 @@ rm(list=setdiff(ls(), "params"))
 library(rmarkdown)
 library(stringr)
 library(dplyr)
-library(rtracklayer)
-library(VariantAnnotation,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
-library(rmarkdown)
+#library(rtracklayer)
+#library(VariantAnnotation,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
 library(ggplot2,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
-library("viridis",quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
-library(edgeR,quietly = T,verbose = F)
-library('GenomicFeatures',quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
-library('rtracklayer',quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
-library(matrixStats,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+#library("viridis",quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+#library(edgeR,quietly = T,verbose = F)
+#library('GenomicFeatures',quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+#library('rtracklayer',quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+#library(matrixStats,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
 library(plyr,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
 library(tidyr,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
-library(fitdistrplus,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
+#library(fitdistrplus,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
 library(stringr,quietly = T,verbose = F,warn.conflicts = F,logical.return = F)
 library(data.table)
-library(reshape)
+#library(reshape)
 library(knitr)
 library(stringi)
-library(BSgenome)
-library(biomaRt)
+#library(BSgenome)
+#library(biomaRt)
 library(plotly)
 library(tidyr)
-library(GenomicRanges)
+#library(GenomicRanges)
 library(RColorBrewer)
 library('gplots')
 library(ggpubr)
 library(circlize)
-library('regioneR')
+#library('regioneR')
 library(scales)
 blank_theme <- theme_minimal()+
   theme(
@@ -64,11 +63,10 @@ blank_theme <- theme_minimal()+
 ```{r SetParams, echo=F, message=FALSE, warning=FALSE, eval=T, include=F,results=F,}
 peak_in=read.table(params$peak_in, sep = '\t', header=TRUE, fill=TRUE)
 samplename=params$samplename
-peak_heigth=as.numeric(params$peak_heigth)
+peak_height=as.numeric(params$peak_height)
 output_table=params$output_table
 PeakIdnt=params$PeakIdnt
 incd_rRNA=T 
-
 ```
 
 <!-- # Set color schemes  -->
@@ -161,7 +159,7 @@ Peaks_Anno=Peaks_Anno[!Peaks_Anno$chrom%in%'K',]
 
 <!-- # Histogram of Reads per Peak  -->
 
-Identify peaks with All non-spliced reads (unique and Multimapping) and count number of reads that overlap with the identified peaks. Peaks with minimum height >= `r toString(peak_heigth)` were assessed.  
+Identify peaks with All non-spliced reads (unique and Multimapping) and count number of reads that overlap with the identified peaks. Peaks with minimum height >= `r toString(peak_height)` were assessed.  
 
 
 ```{r PeakDepthHist,fig.align='center',echo=F,warning=F,eval=T,include=T}
