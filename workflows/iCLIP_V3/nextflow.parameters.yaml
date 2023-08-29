@@ -8,25 +8,25 @@ sourcedir: '/opt2/' # source directory. Do NOT change if using containers.
 
 
 rawfilesnames: # list of raw files names
-  - 'PARiCLIP_mRO3_S1_R1_001'
+#- 'PARiCLIP_mRO3_S1_R1_001'
   #- '2_PARiCLIP_mRO2_S1_R1_001'
   #- 'toyfile'
   #- 'toyfile2'
-  #- 'toyfile3'
+  - 'toyfile3'
 
 rawdir: '/data/RBL_NCI/WilTemp/iCLIP/rawfiles/' # directory for rawfiles
 
 samplenames:
   - 'YKO_Clip3'
-  - 'Y1KO_Clip3'
-  - 'Y3KO_Clip3'
+    #- 'Y1KO_Clip3'
+    #- 'Y3KO_Clip3'
   - 'Ro_Clip3'
   #- 'Control_Clip3'
 
 contrasts:
   - ['YKO_Clip3', 'Ro_Clip3']
-  - ['Y1KO_Clip3', 'Ro_Clip3']
-  - ['Y3KO_Clip3', 'Ro_Clip3']
+    #- ['Y1KO_Clip3', 'Ro_Clip3']
+    #- ['Y3KO_Clip3', 'Ro_Clip3']
 
 
 reference: "" # reference organism ["hg38","mm10"]

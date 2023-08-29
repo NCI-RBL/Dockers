@@ -35,7 +35,7 @@ def CombineTypes(row):
             if str(row[strand+'_exon_number']) not in ['.', ' ', '']:
                 row[strand+'_Comb_type'] = 'lncRNA: Exonic'
 
-        if row[strand+'_gene_type'] == 'processed_pseudogene':
+        if row[strand+'_gene_type'] in ['processed_pseudogene', 'unprocessed_pseudogene']:
             row[strand+'_Comb_type'] = 'pseudogene'
 
         if row[strand+'_Repeat'] not in ['.', ' ', '', 'lncRNA']:

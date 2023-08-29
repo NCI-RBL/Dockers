@@ -79,7 +79,7 @@ process Create_Project_Annotations {
 
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val unique
@@ -121,7 +121,7 @@ process Create_Project_Annotations {
 
 process Init_ReadCounts_Reportfile {
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val unique
@@ -134,6 +134,8 @@ process Init_ReadCounts_Reportfile {
         # create output file
         if [[ -f !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt ]]; then rm !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt ; fi 
         touch !{params.workdir}/00_QC/02_SamStats/qc_read_count_raw_values.txt
+        cp !{params.sourcedir}/06_annotation.Rmd !{params.workdir}/06_annotation.Rmd
+        cp !{params.sourcedir}/08_MANORM_Report.Rmd !{params.workdir}/08_MANORM_Report.Rmd
         """
 }
 
@@ -148,7 +150,7 @@ process QC_Barcode {
     --mpid clip3 must be changed to be a variable etracted from relevant manifest
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         tuple val(unique), val(rawfile)
@@ -192,7 +194,7 @@ process Demultiplex {
     SIM_iCLIP_S1    Control_Clip    CNTRL       NNNCGGANN   AGATCGGAAGAGCGGTTCAG
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val rawfile
@@ -224,7 +226,7 @@ process Star {
     https://github.com/alexdobin/STAR/releases
 
     """
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         tuple val(rawfile), val(samplefile)
@@ -295,7 +297,7 @@ process Index_Stats{
     run samstats on files
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -327,7 +329,7 @@ process Check_ReadCounts {
     http://www.htslib.org/doc/samtools-stats.html
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -369,7 +371,7 @@ if [ 1 -eq "\$(echo "\${{fail}} > 0" | bc)" ]; then
 
 process FastQC {
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         tuple val(rawfile), val(samplefile)
@@ -402,7 +404,7 @@ process QC_Screen_Validator {
         Log file containing any warnings or errors on file
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -456,7 +458,7 @@ process MultiQC {
     https://multiqc.info/docs/#running-multiqc
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val check
@@ -488,7 +490,7 @@ process DeDup {
     get header of dedup file
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -524,7 +526,7 @@ process Remove_Spliced_Reads {
     Spliced reads create spliced peaks and will be dealt with by mapping against the transcriptome.
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -576,7 +578,7 @@ process Create_Safs {
     Reformat BED into SAF.
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -607,7 +609,7 @@ process Feature_Counts {
     all reads as input and the second takes only unique reads as input
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -657,7 +659,7 @@ process CombineCounts {
     Combining the different type of counts done in FeatureCounts
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -681,7 +683,7 @@ process Peak_Annotation {
     Annotate peaks with GeneCode, Introns, and RepeatMasker
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -760,7 +762,7 @@ process Annotation_Report {
     generates an HTML report for peak annotations
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -771,8 +773,9 @@ process Annotation_Report {
     shell:
         """
         #echo 'boom'
+
         /opt/conda/bin/Rscript -e 'library(rmarkdown); \
-        rmarkdown::render("!{params.sourcedir}/06_annotation.Rmd", \
+        rmarkdown::render("!{params.workdir}/06_annotation.Rmd", \
             output_file = "!{params.workdir}/04_annotation/!{samplefile}_!{params.peakid}readPeaks_final_report.html", \
             params= list(samplename = "!{samplefile}", \
                 NCRNA_annotation = "!{params.workdir}/04_annotation/01_project/", \
@@ -790,7 +793,7 @@ process SplitByStrand {
     Slit read and peak files by strand
     """
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
         val samplefile
@@ -809,7 +812,7 @@ process SplitByStrand {
 
 process MANORM_analysis {
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
        tuple val(sample), val(background), val(dummy)
@@ -862,7 +865,7 @@ process MANORM_analysis {
 
 process Manorm_Report {
 
-    container 'wilfriedguiblet/iclip:v3.0.3' // Use a Docker container
+    container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
 
     input:
        tuple val(sample), val(background)
@@ -873,9 +876,6 @@ process Manorm_Report {
     shell:
         """
         set -exo pipefail
-
-        #awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "+", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_pos/!{sample}_vs_!{background}_all_MAvalues.xls > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
-        #awk -v OFS='\t' 'NR>1 {print \$1, \$2, \$3, "MANORM_PEAK", "0", "-", \$5, \$7, \$8, \$9, \$10}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_neg/!{sample}_vs_!{background}_all_MAvalues.xls >> !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed
 
         awk '{{OFS="\\t"; if (\$3-\$2 >= 20) print \$1":"\$2"-"\$3"_"\$6,\$1,\$2,\$3,\$6}}' !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.saf
 
@@ -924,50 +924,50 @@ process Manorm_Report {
 
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
         | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.SameStrand.bed
 
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
         | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
-        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.bed \\
+        -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed
 
-        #python !{params.workdir}/AnnotationFormat.py \\
-        python !{params.sourcedir}/AnnotationFormat.py \\
+        #python !{params.workdir}/MANORM_AnnotationFormat.py \\
+        python !{params.sourcedir}/MANORM_AnnotationFormat.py \\
         --SameStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed \\
         --SameStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed \\
         --SameStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed \\
@@ -976,10 +976,11 @@ process Manorm_Report {
         --OppoStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed \\
         --OppoStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed \\
         --OppoStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed \\
+        --Counts !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.txt \\
         --Output !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt        
 
-        Rscript -e 'library(rmarkdown); \
-        rmarkdown::render("!{params.sourcedir}/08_MANORM_Report.Rmd", \
+        /opt/conda/bin/Rscript -e 'library(rmarkdown); \
+        rmarkdown::render("!{params.workdir}/08_MANORM_Report.Rmd", \
             output_file = "!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_report.html", \
             params= list(peak_in="!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt", \
                 PeakIdnt="!{params.peakid}",\

@@ -4,6 +4,9 @@ ENV TAG="v0.3"
 
 ENV PATH=$CONDA_DIR/bin:$PATH
 
+COPY workflow/scripts/08_MANORM_Report.Rmd /opt2/
+RUN chmod 774 /opt2/08_MANORM_Report.Rmd 
+
 # Update more permissions
 
 RUN chmod 774 -R /opt2/fqscreen_rrna_config.conf && \

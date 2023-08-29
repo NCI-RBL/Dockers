@@ -52,5 +52,5 @@ nextflow run iCLIP_v3.0.1.nf -c nextflow.config \
         --outdir ${project}/ ${Arguments} \
 	-with-report ${project}/Report.html \
 	-with-dag ${project}/Flowchart.html \
-	-with-timeline ${project}/Timeline.html \
-	-resume
+	-with-timeline ${project}/Timeline.html #\
+	#-resume

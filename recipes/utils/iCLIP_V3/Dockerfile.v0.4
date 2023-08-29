@@ -1,0 +1,28 @@
+FROM wilfriedguiblet/iclip:v3.0.3
+
+ENV TAG="v0.4"
+
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+COPY workflow/scripts/08_MANORM_Report.Rmd /opt2/
+COPY workflow/scripts/06_annotation.Rmd /opt2/
+COPY workflow/scripts/AnnotationFormat.py /opt2/
+COPY workflow/scripts/MANORM_AnnotationFormat.py /opt2/
+
+RUN chmod 774 /opt2/08_MANORM_Report.Rmd && \
+    chmod 774 /opt2/06_annotation.Rmd && \
+    chmod 774 /opt2/AnnotationFormat.py && \
+    chmod 774 /opt2/MANORM_AnnotationFormat.py
+
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
