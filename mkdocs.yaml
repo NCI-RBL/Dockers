@@ -108,3 +108,7 @@ nav:
     - Description: ISOMIR/descript.md
     - Initialize: ISOMIR/init.md
     - Run: ISOMIR/run.md
+  - RiboFootPrint:
+    - Description: RiboFootPrint/descript.md
+    - Initialize: RiboFootPrint/init.md
+    - Run: RiboFootPrint/run.md

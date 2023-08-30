@@ -4,6 +4,8 @@ ENV TAG="v0.4"
 
 ENV PATH=$CONDA_DIR/bin:$PATH
 
+COPY config/ /opt2/
+
 COPY workflow/scripts/08_MANORM_Report.Rmd /opt2/
 COPY workflow/scripts/06_annotation.Rmd /opt2/
 COPY workflow/scripts/AnnotationFormat.py /opt2/

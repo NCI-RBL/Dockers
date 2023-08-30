@@ -3,15 +3,11 @@
 nextflow.enable.dsl=2
 
 
-// Define input arguments
-params.fastqdir = 'Project/40S/'
-params.fastq_files = 'Project/40S/*fastq.gz'
-params.outdir = ''
-params.linker = 'NNNNNNCACTCGGGCACCAAGGA'
+fastq_files = Channel.fromList(params.samples)
 
-// Create a channel from the input path
-fastq_files = Channel.fromPath(params.fastq_files)
+subparts = Channel.fromList(['5utr', 'cds', '3utr'])
 
+// Processes
 
 process RunRiboSeq {
 
@@ -21,70 +17,71 @@ process RunRiboSeq {
     val fastq_file
 
   output:
-    val "${fastq_file.baseName}"
+    val fastq_file
 
-
-  script:
+  shell:
     """
-    seqtk trimfq -b 4 /data2/${params.fastqdir}/${fastq_file.baseName}.gz  > /data2/${params.outdir}/${fastq_file.baseName}.trimmed
-    skewer -t 26 -x ${params.linker} -l 15 /data2/${params.outdir}/${fastq_file.baseName}.trimmed
+    seqtk trimfq -b 4 /data2/${params.fastqdir}/${fastq_file}.fastq.gz  > /data2/${params.outdir}/${fastq_file}.trimmed
+    skewer -t 26 -x ${params.linker} -l 15 /data2/${params.outdir}/${fastq_file}.trimmed
 
-    STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file.baseName}-trimmed.fastq --genomeDir /data2/index/star_hg19_ncrna/ --outReadsUnmapped Fastx --outSAMtype None --outFilterMismatchNoverLmax 0.3 --outFileNamePrefix /data2/${params.outdir}/${fastq_file.baseName}.ncrnaout.
+    STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file}-trimmed.fastq --genomeDir /data2/index/star_hg19_ncrna/ --outReadsUnmapped Fastx --outSAMtype None --outFilterMismatchNoverLmax 0.3 --outFileNamePrefix /data2/${params.outdir}/${fastq_file}.ncrnaout.
 
-    STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file.baseName}.ncrnaout.Unmapped.out.mate1 --limitBAMsortRAM 600000000000 --genomeDir /data2/index/hg19/ --outFilterType BySJout --outFilterIntronMotifs RemoveNoncanonicalUnannotated --alignSJDBoverhangMin 1 --alignSJoverhangMin 8 --outFilterMultimapNmax 1 --outFilterMismatchNoverLmax 0.1 --outWigType wiggle read1_5p --outWigNorm RPM --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --outFileNamePrefix /data2/${params.outdir}/${fastq_file.baseName}.
+    STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file}.ncrnaout.Unmapped.out.mate1 --limitBAMsortRAM 600000000000 --genomeDir /data2/index/hg19/ --outFilterType BySJout --outFilterIntronMotifs RemoveNoncanonicalUnannotated --alignSJDBoverhangMin 1 --alignSJoverhangMin 8 --outFilterMultimapNmax 1 --outFilterMismatchNoverLmax 0.1 --outWigType wiggle read1_5p --outWigNorm RPM --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --outFileNamePrefix /data2/${params.outdir}/${fastq_file}.
 
-    bedtools bamtobed -i /data2/${params.outdir}/${fastq_file.baseName}.Aligned.toTranscriptome.out.bam > /data2/${params.outdir}/${fastq_file.baseName}.bed
 
-    samtools sort /data2/${params.outdir}/${fastq_file.baseName}.Aligned.toTranscriptome.out.bam > /data2/${params.outdir}/${fastq_file.baseName}.Aligned.toTranscriptome.out.sorted.bam
-    samtools index /data2/${params.outdir}/${fastq_file.baseName}.Aligned.toTranscriptome.out.sorted.bam
-
+    samtools sort /data2/${params.outdir}/${fastq_file}.Aligned.toTranscriptome.out.bam > /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam 
+    samtools index /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam
+    samtools view -c /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam > /data2/${params.outdir}/${fastq_file}.readcount
+    bedtools bamtobed -i /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam > /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bed
     """
 
 }
 
-
-
-process RunCTK {
-
-  container 'wilfriedguiblet/ctk:v0.1'
+process ReadStarts {
 
   input:
     val fastq_file
 
   output:
-    val "${fastq_file.baseName}"
+    val fastq_file
 
-  script:
+  shell:
     """
-    cd /data2/
-    export PERL5LIB=/opt/conda/lib/czplib
-    /opt/conda/lib/ctk/tag2peak.pl \
-      -big -ss \
-      -p 0.05 --multi-test\
-      --valley-seeking \
-      --valley-depth 0.9 \
-      /data2/${params.outdir}/${fastq_file.baseName}.bed /data2/${params.outdir}/${fastq_file.baseName}.peak.bed \
-      --out-boundary /data2/${params.outdir}/${fastq_file.baseName}.uniq.peak.boundary.bed \
-      --out-half-PH /data2/${params.outdir}/${fastq_file.baseName}.uniq.peak.halfPH.bed \
-      --multi-test
+    python ${params.workdir}/ReadStarts_V2.py --Infile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.bed --Outfile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.starts --TranscriptomeFile ${params.workdir}/hg19.transcriptome.bed
+    """
+}
+
+process Relative_Aggregate {
+
+  input:
+    val fastq_file
+
+  output:
+    val fastq_file
+
+  shell:
+    """
+    python ${params.workdir}/Relative_Aggregate_V2.py --Infile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.starts --Outfile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.RelativeAggregate --SubPartsFile ${params.workdir}/subparts.5utr20bp.txt
+    """
+}
+
+process Plot_Aggregates {
+
+  input:
+    val fastq_file
+
+  output:
+    val fastq_file
+
+  shell:
+    """
+    Rscript ${params.workdir}/PlotAggregates_V2.r ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.RelativeAggregate ${params.workdir}/${params.outdir}/ ${fastq_file} ${params.workdir}/${params.outdir}/${fastq_file}.readcount
     """
 }
 
 
-//process diffbind {
-
-//  container 'wilfriedguiblet/dteg:v0.3'
-
-//  input:
-//    val fastq_file
-
-//  output:
-//    val "${fastq_file.baseName}"
-
-
-
 workflow {
 
-  RunRiboSeq(fastq_files)
-  RunCTK(fastq_files)
+  RunRiboSeq(fastq_files) | ReadStarts | Relative_Aggregate | Plot_Aggregates
+
 }

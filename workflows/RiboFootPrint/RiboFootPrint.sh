@@ -1,15 +1,27 @@
 #!/bin/bash
-#SBATCH --ntasks=8
-#SBATCH --cpus-per-task=8
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=2
 #SBATCH --open-mode=append
-#SBATCH --time=12:00:00
-#SBATCH --mem=200g
+#SBATCH --time=2:00:00
+#SBATCH --mem=450g
 #SBATCH --job-name=RiboPrint
-
 
 # Author : Wilfried Guiblet
 
 module load singularity
 module load nextflow
+module load ucsc
+module load bedtools
+module load R
 
-nextflow run RiboFootPrint.nf -c nextflow.config --outdir Results/ -resume 
+
+mkdir -p Results
+
+ResumeArg=$1
+
+nextflow run RiboFootPrint.nf --workdir $PWD  -c nextflow.config -params-file RiboFootPrint.parameters.yaml  ${ResumeArg} 
+#nextflow run RiboFootPrint.nf -c nextflow.config --outdir Results/ --workdir $PWD -resume 
+
+#gzip Results/*bedgraph
+
+
