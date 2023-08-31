@@ -21,18 +21,19 @@ process RunRiboSeq {
 
   shell:
     """
-    seqtk trimfq -b 4 /data2/${params.fastqdir}/${fastq_file}.fastq.gz  > /data2/${params.outdir}/${fastq_file}.trimmed
-    skewer -t 26 -x ${params.linker} -l 15 /data2/${params.outdir}/${fastq_file}.trimmed
+    #seqtk trimfq -b 4 /data2/${params.fastqdir}/${fastq_file}.fastq.gz  > /data2/${params.outdir}/${fastq_file}.trimmed
+    #skewer -t 26 -x ${params.linker} -l 15 /data2/${params.outdir}/${fastq_file}.trimmed
 
-    STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file}-trimmed.fastq --genomeDir /data2/index/star_hg19_ncrna/ --outReadsUnmapped Fastx --outSAMtype None --outFilterMismatchNoverLmax 0.3 --outFileNamePrefix /data2/${params.outdir}/${fastq_file}.ncrnaout.
+    #STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file}-trimmed.fastq --genomeDir /data2/index/star_hg19_ncrna/ --outReadsUnmapped Fastx --outSAMtype None --outFilterMismatchNoverLmax 0.3 --outFileNamePrefix /data2/${params.outdir}/${fastq_file}.ncrnaout.
 
-    STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file}.ncrnaout.Unmapped.out.mate1 --limitBAMsortRAM 600000000000 --genomeDir /data2/index/hg19/ --outFilterType BySJout --outFilterIntronMotifs RemoveNoncanonicalUnannotated --alignSJDBoverhangMin 1 --alignSJoverhangMin 8 --outFilterMultimapNmax 1 --outFilterMismatchNoverLmax 0.1 --outWigType wiggle read1_5p --outWigNorm RPM --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --outFileNamePrefix /data2/${params.outdir}/${fastq_file}.
+    #STAR --runThreadN 26 --readFilesIn /data2/${params.outdir}/${fastq_file}.ncrnaout.Unmapped.out.mate1 --limitBAMsortRAM 600000000000 --genomeDir /data2/index/hg19/ --outFilterType BySJout --outFilterIntronMotifs RemoveNoncanonicalUnannotated --alignSJDBoverhangMin 1 --alignSJoverhangMin 8 --outFilterMultimapNmax 1 --outFilterMismatchNoverLmax 0.1 --outWigType wiggle read1_5p --outWigNorm RPM --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --outFileNamePrefix /data2/${params.outdir}/${fastq_file}.
 
-
-    samtools sort /data2/${params.outdir}/${fastq_file}.Aligned.toTranscriptome.out.bam > /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam 
-    samtools index /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam
-    samtools view -c /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam > /data2/${params.outdir}/${fastq_file}.readcount
+    #samtools sort /data2/${params.outdir}/${fastq_file}.Aligned.toTranscriptome.out.bam > /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam 
+    #samtools index /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam
+    #samtools view -c /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam > /data2/${params.outdir}/${fastq_file}.readcount
     bedtools bamtobed -i /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bam > /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bed
+
+    awk -v OFS='\t' '{if (\$3-\$2 <= !{params.MaxReadLength}) print \$0}' /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.bed > /data2/${params.outdir}/${fastq_file}.hg19.transcriptome.filtered.bed
     """
 
 }
@@ -47,7 +48,7 @@ process ReadStarts {
 
   shell:
     """
-    python ${params.workdir}/ReadStarts_V2.py --Infile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.bed --Outfile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.starts --TranscriptomeFile ${params.workdir}/hg19.transcriptome.bed
+    python ${params.workdir}/ReadStarts_V2.py --Infile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.filtered.bed --Outfile ${params.workdir}/${params.outdir}/${fastq_file}.hg19.transcriptome.starts --TranscriptomeFile ${params.workdir}/hg19.transcriptome.bed --Shift ${params.Shift}
     """
 }
 
@@ -82,6 +83,6 @@ process Plot_Aggregates {
 
 workflow {
 
-  RunRiboSeq(fastq_files) | ReadStarts | Relative_Aggregate | Plot_Aggregates
-
+  //RunRiboSeq(fastq_files) | ReadStarts | Relative_Aggregate | Plot_Aggregates
+  Plot_Aggregates(fastq_files)
 }

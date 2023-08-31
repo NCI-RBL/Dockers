@@ -16,7 +16,7 @@ def IndexTranscriptome(TranscriptomeFile):
 
 	return TranscriptomeIndex
 
-def ReadStarts(Infile, Outfile, TranscriptomeIndex):
+def ReadStarts(Infile, Outfile, Shift, TranscriptomeIndex):
 
 	infile = open(Infile, 'rt')
 	outfile = open(Outfile, 'w+')
@@ -27,6 +27,8 @@ def ReadStarts(Infile, Outfile, TranscriptomeIndex):
 		array = line.strip().split('\t')
 		chrom, start, end = array[0:3]
 		#subpart_start, subpart_end = array[7], array[8]
+		start = str(int(start) + int(Shift))
+		end = str(int(end) + int(Shift))
 
 		try:
 			transcript_start, transcript_end = TranscriptomeIndex[chrom]
@@ -53,11 +55,12 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--Infile', type=str, required=True)
 	parser.add_argument('--Outfile', type=str, required=True)
+	parser.add_argument('--Shift', type=str, required=True)
 	parser.add_argument('--TranscriptomeFile', type=str, required=True)
 
 
 	args = parser.parse_args()
-	ReadStarts(args.Infile, args.Outfile, IndexTranscriptome(args.TranscriptomeFile))
+	ReadStarts(args.Infile, args.Outfile, args.Shift, IndexTranscriptome(args.TranscriptomeFile))
 
 
 if __name__ == '__main__':

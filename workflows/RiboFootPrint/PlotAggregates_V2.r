@@ -85,6 +85,6 @@ g=ggplot() +
              x = 'Transcript Position',
              title = OUTNAME) +
         guides(color = guide_legend(title = "")) +
-        coord_cartesian(ylim = c(0,2e3))#, xlim = c(0.99, 1.02))
+        coord_cartesian(ylim = c(0,4e3))#, xlim = c(0.99, 1.02))
 
 ggsave(g, file=paste0(OUTDIR,OUTNAME,".transcript.aggregates.png"), width = 8, height = 5)

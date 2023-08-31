@@ -2,8 +2,8 @@
 #SBATCH --ntasks=2
 #SBATCH --cpus-per-task=2
 #SBATCH --open-mode=append
-#SBATCH --time=2:00:00
-#SBATCH --mem=450g
+#SBATCH --time=1:00:00
+#SBATCH --mem=150g
 #SBATCH --job-name=RiboPrint
 
 # Author : Wilfried Guiblet

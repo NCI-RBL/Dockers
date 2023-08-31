@@ -1,25 +1,29 @@
 
 
-fastqdir: 'Project/40S/'
+#fastqdir: 'Project/40S/'
 #fastqdir: 'Project/80S/'
 #fastqdir: 'Project/disome/'
 #fastqdir: 'Project/HTN/'
-#fastqdir: 'Project/Gcn2ko/'
+fastqdir: 'Project/Gcn2ko/'
 
 outdir: './Results/'
 
 linker: 'NNNNNNCACTCGGGCACCAAGGA'
 
+MaxReadLength: '100'
+
+Shift: '20'
+
 samples:
-  - 'WT1'
-  - 'WT2'
-  - 'WT3'
-  - 'RNF10KO1'
-  - 'RNF10KO2'
-  - 'RNF10KO3'
-  - 'USP10KO1'
-  - 'USP10KO2'
-  - 'USP10KO3'
+  #- 'WT1'
+  #- 'WT2'
+  #- 'WT3'
+  #- 'RNF10KO1'
+  #- 'RNF10KO2'
+  #- 'RNF10KO3'
+  #- 'USP10KO1'
+  #- 'USP10KO2'
+  #- 'USP10KO3'
   #- 'ZNF598KO1' 
   #- 'ZNF598KO2'
   #- 'WTmono1'
@@ -28,10 +32,10 @@ samples:
   #- 'USP10KOmono1'
   #- 'HTN_40S'
   #- 'Unt_40S'
-  #- '40SWTD'
-  #- '40SWTNT'
-  #- '40SMUTD'
-  #- '40SMUTNT'
+  - '40SWTD'
+  - '40SWTNT'
+  - '40SMUTD'
+  - '40SMUTNT'
 
 
 
