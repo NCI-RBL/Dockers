@@ -29,7 +29,7 @@ contrasts:
     #- ['Y3KO_Clip3', 'Ro_Clip3']
 
 
-reference: "" # reference organism ["hg38","mm10"]
+reference: mm10 # reference organism [hg38,mm10]
 include_rRNA: "Y" # whether to include refseq rRNA's in annotations ["Y", "N"]
 peakid: "ALL"
 #mincount: 3 #minimum number of reads to count as a peak [1,2,3]

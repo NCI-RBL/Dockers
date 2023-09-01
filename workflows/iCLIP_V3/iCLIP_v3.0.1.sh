@@ -50,8 +50,7 @@ export SINGULARITY_CACHEDIR=$PWD/.singularity
 timestamp=$(date +%Y%m%d_%H%M)
 project="iCLIP_run_"$timestamp
 
-Reference=$1
-Arguments=$2
+Arguments=$1
 
 nextflow run iCLIP_v3.0.1.nf -c nextflow.config \
         --workdir $PWD \
@@ -59,5 +58,4 @@ nextflow run iCLIP_v3.0.1.nf -c nextflow.config \
         -with-report ${project}/Report.html \
         -with-dag ${project}/Flowchart.html \
         -with-timeline ${project}/Timeline.html \
-        --reference ${Reference} \
         ${Arguments}
