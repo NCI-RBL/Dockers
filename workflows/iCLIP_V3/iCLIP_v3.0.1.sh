@@ -43,14 +43,21 @@ mkdir -p 04_annotation/02_peaks/
 mkdir -p 05_demethod/02_analysis
 mkdir -p log/STAR
 
+
 export NXF_SINGULARITY_CACHEDIR=$PWD/.singularity
+export SINGULARITY_CACHEDIR=$PWD/.singularity
+
+timestamp=$(date +%Y%m%d_%H%M)
+project="iCLIP_run_"$timestamp
+
+Reference=$1
+Arguments=$2
 
 nextflow run iCLIP_v3.0.1.nf -c nextflow.config \
-	--workdir $PWD \
-	--reference mm10 \
-	-params-file nextflow.parameters.yaml \
-        --outdir ${project}/ ${Arguments} \
-	-with-report ${project}/Report.html \
-	-with-dag ${project}/Flowchart.html \
-	-with-timeline ${project}/Timeline.html #\
-	#-resume
+        --workdir $PWD \
+        -params-file nextflow.parameters.yaml \
+        -with-report ${project}/Report.html \
+        -with-dag ${project}/Flowchart.html \
+        -with-timeline ${project}/Timeline.html \
+        --reference ${Reference} \
+        ${Arguments}
