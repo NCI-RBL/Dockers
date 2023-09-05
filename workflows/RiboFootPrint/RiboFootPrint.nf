@@ -83,6 +83,6 @@ process Plot_Aggregates {
 
 workflow {
 
-  //RunRiboSeq(fastq_files) | ReadStarts | Relative_Aggregate | Plot_Aggregates
-  Plot_Aggregates(fastq_files)
+  RunRiboSeq(fastq_files) | ReadStarts | Relative_Aggregate | Plot_Aggregates
+  //Plot_Aggregates(fastq_files)
 }
