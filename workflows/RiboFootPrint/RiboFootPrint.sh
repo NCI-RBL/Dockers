@@ -14,6 +14,8 @@ module load ucsc
 module load bedtools
 module load R
 
+export NXF_SINGULARITY_CACHEDIR=$PWD/.singularity
+export SINGULARITY_CACHEDIR=$PWD/.singularity
 
 mkdir -p Results
 
