@@ -55,6 +55,7 @@ else{
     // external demux uses an _
     params.umi_sep = params.umiSeparator}
 
+
 // ************* End of parameter importation *************
 
 
@@ -89,18 +90,7 @@ process Create_Project_Annotations {
 
     shell:
         """
-        #Rscript !{params.sourcedir}/04_annotation.R \\
-        #  --ref_species !{params.reference} \\
-        #  --refseq_rRNA !{params.rrna_flag} \\
-        #  --alias_path !{params."${params.reference}".aliaspath} \\
-        #  --gencode_path !{params."${params.reference}".gencodepath} \\
-        #  --refseq_path !{params."${params.reference}".refseqpath} \\
-        #  --canonical_path !{params."${params.reference}".can_path} \\
-        #  --intron_path !{params."${params.reference}".intronpath} \\
-        #  --rmsk_path !{params."${params.reference}".rmskpath} \\
-        #  --custom_path !{params."${params.reference}".additionalannopath} \\
-        #  --out_dir !{params.workdir}/04_annotation/01_project/ \\
-        #  --reftable_path !{params.sourcedir}/annotation_config.txt 
+
 
         awk -v OFS='\t' '(NR>1) {print \$6, \$7, \$8, \$11, \$12, \$10, \$13}' !{params."${params.reference}".rmskpath} \\
              > !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed
@@ -421,14 +411,14 @@ process QC_Screen_Validator {
          > !{params.workdir}/temp/!{samplefile}.fastq;
         
         # Run FastQ Screen
-        fastq_screen --conf !{params.sourcedir}/fqscreen_species_config.conf \\
+        fastq_screen --conf !{params.QC_Screen_Validator.fqscreen_species_config} \\
             --outdir !{params.workdir}/00_QC/04_QC_ScreenSpecies \\
             --threads !{params.QC_Screen_Validator.threads} \\
             --subset 1000000 \\
             --aligner bowtie2 \\
             --force \\
             !{params.workdir}/temp/!{samplefile}.fastq ;
-        fastq_screen --conf !{params.sourcedir}/fqscreen_rrna_config.conf \\
+        fastq_screen --conf !{params.QC_Screen_Validator.fqscreen_rrna_config} \\
             --outdir !{params.workdir}/00_QC/05_QC_ScreenRRNA \\
             --threads !{params.QC_Screen_Validator.threads} \\
             --subset 1000000 \\
@@ -925,57 +915,57 @@ process Manorm_Report {
 
         bedtools intersect -s -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
-        -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed
+        -b !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.!{params.reference}.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
-        -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed
+        -b !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.!{params.reference}.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
-        -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
+        -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed \\
         | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed
 
         bedtools intersect -s -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.SameStrand.bed
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.!{params.reference}.intersect.SameStrand.bed
 
 
         bedtools intersect -S -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
-        -b !{params.workdir}/04_annotation/01_project/rmsk.mm10.bed \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.OppoStrand.bed
+        -b !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.!{params.reference}.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
-        -b !{params.workdir}/04_annotation/01_project/gencode.mm10.bed \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed
+        -b !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed \\
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.!{params.reference}.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
-        -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.mm10.bed \\
+        -b !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed \\
         | awk 'BEGIN {FS = "\t"; OFS = "\t"} \$14 != "." {split(\$15, arr, "_"); \$19 = arr[3]} \$15 == "." { \$19 = "." } 1' \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed
 
         bedtools intersect -S -wao \\
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
-            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed
+            > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.!{params.reference}.intersect.OppoStrand.bed
 
         #python !{params.workdir}/MANORM_AnnotationFormat.py \\
         python !{params.sourcedir}/MANORM_AnnotationFormat.py \\
-        --SameStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.SameStrand.bed \\
-        --SameStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.SameStrand.bed \\
-        --SameStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.SameStrand.bed \\
-        --SameStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.SameStrand.bed \\
-        --OppoStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.mm10.intersect.OppoStrand.bed \\
-        --OppoStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.mm10.intersect.OppoStrand.bed \\
-        --OppoStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.mm10.intersect.OppoStrand.bed \\
-        --OppoStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.mm10.intersect.OppoStrand.bed \\
+        --SameStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.!{params.reference}.intersect.SameStrand.bed \\
+        --SameStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.!{params.reference}.intersect.SameStrand.bed \\
+        --SameStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed \\
+        --SameStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.!{params.reference}.intersect.SameStrand.bed \\
+        --OppoStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.!{params.reference}.intersect.OppoStrand.bed \\
+        --OppoStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.!{params.reference}.intersect.OppoStrand.bed \\
+        --OppoStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.!{params.reference}.intersect.OppoStrand.bed \\
+        --OppoStrandncRNA !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.!{params.reference}.intersect.OppoStrand.bed \\
         --Counts !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_ALLreadPeaks_AllRegions.txt \\
         --Output !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt        
 
@@ -984,10 +974,10 @@ process Manorm_Report {
             output_file = "!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}_report.html", \
             params= list(peak_in="!{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.annotation_complete.txt", \
                 PeakIdnt="!{params.peakid}",\
-                samplename="!{sample}}", \
+                samplename="!{sample}", \
                 background="!{background}", \
                 pval="!{params.MANormPValue}", \
-                FC="", \
+                FC="1", \
                 incd_rRNA="T"\
                 ))'
         """
