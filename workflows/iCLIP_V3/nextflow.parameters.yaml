@@ -28,12 +28,19 @@ contrasts:
     #- ['Y1KO_Clip3', 'Ro_Clip3']
     #- ['Y3KO_Clip3', 'Ro_Clip3']
 
+barcodes:
+  - 'NNNNNGATCTGNNNN:YKO_Clip3'
+  - 'NNNNNATTGGCNNNN:Ro_Clip3'
+  - 'NNNNNCACTGTNNNN:Control_Clip3'
+  - 'NNNNNTACAAGNNNN:Y1KO_Clip3'
+  - 'NNNNNTTTCACNNNN:Y3KO_Clip3'
 
-reference: mm10 # reference organism [hg38,mm10]
+
+reference: mm10 # reference organism ["hg38","mm10"]
 include_rRNA: "Y" # whether to include refseq rRNA's in annotations ["Y", "N"]
 peakid: "ALL"
 #mincount: 3 #minimum number of reads to count as a peak [1,2,3]
-DEmethod: "NONE" #DE method ["NONE", "MANORM", "DIFFBIND"]
+#DEmethod: "NONE" #DE method ["NONE", "MANORM", "DIFFBIND"]
 mismatch: 1 #required for multiplexed samples, number of bp mismatches allowed in demultiplexing [1,2,3]
 min_reads_mapped: 0.5 #minimum percent of reads that should be mapped; IE .5 for 50% of all reads must be mapped [0.5]
 umiSeparator: "rbc:" #required for nondemultiplexed samples to determine delimiter for deduplication [":", "_", "rbc:"]
@@ -42,12 +49,19 @@ MANormWidth: 50 #Width of window to calculate read density. [any integer >1; def
 MNormDistance: 25 #Summit-to-summit distance cutoff for common peaks. [ any integer >1; default MANormWidth/2]
 MANormPValue: 0.005
 
+# BIOWULF
 containerDir: "/data/CCBR_Pipeliner/Pipelines/iCLIP/container"
 fastq_val: "/data/CCBR_Pipeliner/Pipelines/iCLIP/bin/fastQValidator"
+
+# FRCE
+#containerDir: "/mnt/rnabl-work/Guiblet/iCLIP/container"
+#fastq_val: "/mnt/rnabl-work/Guiblet/iCLIP/bin/fastQValidator"
 
 #########################################################################################
 # Index paths
 #########################################################################################
+
+# BIOWULF
 hg38:
   stardir: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/hg38/index'
   stargtf: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
@@ -68,6 +82,29 @@ mm10:
   rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
   aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
   additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/additional_anno/'
+
+# FRCE
+#hg38:
+#  stardir: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/hg38/index'
+#  stargtf: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
+#  gencodepath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
+#  refseqpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
+#  canonicalpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
+#  intronpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
+#  rmskpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
+#  aliaspath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
+#  additionalannopath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/additional_anno/'
+#mm10:
+#  stardir: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/mm10/index'
+#  stargtf: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
+#  gencodepath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
+#  refseqpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
+#  canonicalpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
+#  intronpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
+#  rmskpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
+#  aliaspath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
+#  additionalannopath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/additional_anno/'
+
 
 #########################################################################################
 # Manifests
@@ -149,12 +186,18 @@ featureCounts:
 
 QC_Screen_Validator:
   threads: '64'
+  fqscreen_species_config: '/opt2/fqscreen_species_config.conf' # Setting for Biowulf
+  fqscreen_rrna_config: '/opt2/fqscreen_rrna_config.conf' # Setting for Biowulf
+  #fqscreen_species_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_species_config.conf' # Setting for FRCE
+  #fqscreen_rrna_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_rrna_config.conf' # Setting for FRCE
+
+
 
 #########################################################################################
 # CTK parameters
 #########################################################################################
 
 CTK:
-  minimum_peak_height: 5
+  minimum_peak_height: 30
 
 
