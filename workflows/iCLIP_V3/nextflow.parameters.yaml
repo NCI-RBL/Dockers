@@ -49,6 +49,8 @@ MANormWidth: 50 #Width of window to calculate read density. [any integer >1; def
 MNormDistance: 25 #Summit-to-summit distance cutoff for common peaks. [ any integer >1; default MANormWidth/2]
 MANormPValue: 0.005
 
+UniqueReadsInPeaks: 0.5
+
 # BIOWULF
 containerDir: "/data/CCBR_Pipeliner/Pipelines/iCLIP/container"
 fastq_val: "/data/CCBR_Pipeliner/Pipelines/iCLIP/bin/fastQValidator"

@@ -778,9 +778,11 @@ process Annotation_Report {
 }
 
 
-process SplitByStrand {
+
+process SplitByStrandAndFilter {
     """
     Slit read and peak files by strand
+    Only keep peaks with X% Unique Reads
     """
 
     container 'wilfriedguiblet/iclip:v3.0.4' // Use a Docker container
@@ -793,9 +795,12 @@ process SplitByStrand {
 
     shell:
         """
-        awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
+        #awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
+        awk -v OFS='\t' '(NR>1) {if (\$8/\$9 >= !{params.UniqueReadsInPeaks}) print \$2,\$3,\$4,\$8,\$9,\$4}' !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt | awk '{if (\$6 == "+") print \$0}' > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
+        #awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
+        awk -v OFS='\t' '(NR>1) {if (\$8/\$9 >= !{params.UniqueReadsInPeaks}) print \$2,\$3,\$4,\$8,\$9,\$4}' !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt | awk '{if (\$6 == "-") print \$0}' > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
+
         awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.reads.pos.bed
-        awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
         awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.reads.neg.bed
         """
 }
@@ -998,11 +1003,11 @@ workflow {
 
     MultiQC(QC_Screen_Validator.out.collect().toList().unique())
 
-    Star(samplefiles_tuple) | Index_Stats | Check_ReadCounts | DeDup | Remove_Spliced_Reads | CTK_Peak_Calling | Create_Safs | Feature_Counts | CombineCounts | SplitByStrand
+    Star(samplefiles_tuple) | Index_Stats | Check_ReadCounts | DeDup | Remove_Spliced_Reads | CTK_Peak_Calling | Create_Safs | Feature_Counts | CombineCounts | SplitByStrandAndFilter
 
     Peak_Annotation(CombineCounts.out) | Annotation_Report
 
-    MANORM_analysis(contrasts_ch.combine(SplitByStrand.out.collect().toList())) | Manorm_Report
+    MANORM_analysis(contrasts_ch.combine(SplitByStrandAndFilter.out.collect().toList())) | Manorm_Report
 
 
 }
