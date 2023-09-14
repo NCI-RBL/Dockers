@@ -796,9 +796,9 @@ process SplitByStrandAndFilter {
     shell:
         """
         #awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
-        awk -v OFS='\t' '(NR>1) {if (\$8/\$9 >= !{params.UniqueReadsInPeaks}) print \$2,\$3,\$4,\$8,\$9,\$4}' !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt | awk '{if (\$6 == "+") print \$0}' > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
+        awk -v OFS='\t' '(NR>1) {if (\$8/\$9 >= !{params.UniqueReadsInPeaks}) print \$2,\$3,\$4,\$8,\$9,\$5}' !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt | awk '{if (\$6 == "+") print \$0}' > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.pos.bed
         #awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.peaks.boundary.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
-        awk -v OFS='\t' '(NR>1) {if (\$8/\$9 >= !{params.UniqueReadsInPeaks}) print \$2,\$3,\$4,\$8,\$9,\$4}' !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt | awk '{if (\$6 == "-") print \$0}' > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
+        awk -v OFS='\t' '(NR>1) {if (\$8/\$9 >= !{params.UniqueReadsInPeaks}) print \$2,\$3,\$4,\$8,\$9,\$5}' !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.txt | awk '{if (\$6 == "-") print \$0}' > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.peaks.neg.bed
 
         awk '{if (\$6 == "+") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.reads.pos.bed
         awk '{if (\$6 == "-") print \$0}' !{params.workdir}/03_peaks/01_bed/!{samplefile}.bed > !{params.workdir}/05_demethod/02_analysis/!{samplefile}.reads.neg.bed
