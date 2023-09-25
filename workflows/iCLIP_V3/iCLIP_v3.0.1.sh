@@ -10,17 +10,17 @@
 
 module load nextflow
 module load singularity
-module load R
-module load bedtools
-module load STAR
-module load samtools
-module load umitools
-module load manorm
-module load ultraplex
-module load multiqc
-module load fastqc
-module load fastq_screen
-module load bowtie 
+#module load R
+#module load bedtools
+#module load STAR
+#module load samtools
+#module load umitools
+#module load manorm
+#module load ultraplex
+#module load multiqc
+#module load fastqc
+#module load fastq_screen
+#module load bowtie 
 
 mkdir -p 00_QC/01_Barcodes/
 mkdir -p 00_QC/02_SamStats/
