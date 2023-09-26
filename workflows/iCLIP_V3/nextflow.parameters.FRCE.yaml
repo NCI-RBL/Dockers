@@ -1,20 +1,19 @@
 
 # Global parameters
 
-workdir: '/mnt/rnabl-work/Guiblet/iCLIP' # working directory
-tempdir: '/mnt/rnabl-work/Guiblet/iCLIP/temp/' # Temp directory. 
+workdir: '/mnt/rnabl-work/Guiblet/test_iCLIP' # working directory
+tempdir: '/mnt/rnabl-work/Guiblet/test_iCLIP/temp/' # Temp directory. 
 
 sourcedir: '/opt2/' # source directory. Do NOT change if using containers.
 
 
 rawfilesnames: # list of raw files names
-  - 'PARiCLIP_mRO3_S1_R1_001'
+   - 'PARiCLIP_mRO3_S1_R1_001'
   #- '2_PARiCLIP_mRO2_S1_R1_001'
   #- 'toyfile'
   #- 'toyfile2'
-  #- 'toyfile3'
 
-rawdir: '/mnt/rnabl-work/Guiblet/iCLIP/rawfiles/' # directory for rawfiles
+rawdir: '/mnt/rnabl-work/Guiblet/test_iCLIP' # directory for rawfiles
 
 samplenames:
   - 'YKO_Clip3'
@@ -24,16 +23,26 @@ samplenames:
   - 'Control_Clip3'
 
 contrasts:
-  - ['YKO_Clip3', 'Ro_Clip3']
-  - ['Y1KO_Clip3', 'Ro_Clip3']
-  - ['Y3KO_Clip3', 'Ro_Clip3']
+    - ['YKO_Clip3', 'Ro_Clip3']
+    - ['Y1KO_Clip3', 'Ro_Clip3']
+    - ['Y3KO_Clip3', 'Ro_Clip3']
+    - ['Ro_Clip3', 'YKO_Clip3']
+    - ['Ro_Clip3', 'Y1KO_Clip3']
+    - ['Ro_Clip3', 'Y3KO_Clip3']
+
+barcodes:
+  - 'NNNNNGATCTGNNNN:YKO_Clip3'
+  - 'NNNNNATTGGCNNNN:Ro_Clip3'
+  - 'NNNNNCACTGTNNNN:Control_Clip3'
+  - 'NNNNNTACAAGNNNN:Y1KO_Clip3'
+  - 'NNNNNTTTCACNNNN:Y3KO_Clip3'
 
 
-reference: "" # reference organism ["hg38","mm10"]
+reference: mm10 # reference organism ["hg38","mm10"]
 include_rRNA: "Y" # whether to include refseq rRNA's in annotations ["Y", "N"]
 peakid: "ALL"
 #mincount: 3 #minimum number of reads to count as a peak [1,2,3]
-DEmethod: "NONE" #DE method ["NONE", "MANORM", "DIFFBIND"]
+#DEmethod: "NONE" #DE method ["NONE", "MANORM", "DIFFBIND"]
 mismatch: 1 #required for multiplexed samples, number of bp mismatches allowed in demultiplexing [1,2,3]
 min_reads_mapped: 0.5 #minimum percent of reads that should be mapped; IE .5 for 50% of all reads must be mapped [0.5]
 umiSeparator: "rbc:" #required for nondemultiplexed samples to determine delimiter for deduplication [":", "_", "rbc:"]
@@ -42,12 +51,18 @@ MANormWidth: 50 #Width of window to calculate read density. [any integer >1; def
 MNormDistance: 25 #Summit-to-summit distance cutoff for common peaks. [ any integer >1; default MANormWidth/2]
 MANormPValue: 0.005
 
+UniqueReadsInPeaks: 0.9
+
+# FRCE 
 containerDir: "/mnt/rnabl-work/Guiblet/iCLIP/container"
 fastq_val: "/mnt/rnabl-work/Guiblet/iCLIP/bin/fastQValidator"
+
 
 #########################################################################################
 # Index paths
 #########################################################################################
+
+# FRCE
 hg38:
   stardir: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/hg38/index'
   stargtf: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
@@ -69,13 +84,15 @@ mm10:
   aliaspath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
   additionalannopath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/additional_anno/'
 
+
+
 #########################################################################################
 # Manifests
 #########################################################################################
 manifests:
-  samples: '/mnt/rnabl-work/Guiblet/iCLIP/manifests/samples.tsv'
-  multiplex: '/mnt/rnabl-work/Guiblet/iCLIP/manifests/multiplex.tsv'
-  barcode: '/mnt/rnabl-work/Guiblet/iCLIP/manifests/clip3_barcode_manifest.txt'
+  samples: '/mnt/rnabl-work/Guiblet/test_iCLIP/manifests/samples.tsv'
+  multiplex: '/mnt/rnabl-work/Guiblet/test_iCLIP/manifests/multiplex.tsv'
+  barcode: '/mnt/rnabl-work/Guiblet/test_iCLIP/manifests/clip3_barcode_manifest.txt'
 
 #########################################################################################
 # QC barcode parameters
@@ -105,7 +122,7 @@ demultiplex:
 # STAR parameters
 #########################################################################################
 STAR:
-  threads: 16
+  threads: 32
   alignEndsType: "Local" #type of read ends alignment ["Local", "EndToEnd", "Extend5pOfRead1", "Extend5pOfReads12"]
   alignIntronMax: 50000 #maximum intron length
   alignSJDBoverhangMin: 3 # minimum overhang value for annotated spliced junctions
@@ -141,7 +158,7 @@ STAR:
 #########################################################################################
 
 featureCounts:
-  threads: '16'
+  threads: '12'
 
 #########################################################################################
 # QC_Screen_Validator parameters
@@ -149,14 +166,17 @@ featureCounts:
 
 QC_Screen_Validator:
   threads: '64'
-  fqscreen_species_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_species_config.conf' # Setting for FRCE
-  fqscreen_rrna_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_rrna_config.conf' # Setting for FRCE
+  fqscreen_species_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_species_config.conf' # Setting for Biowulf
+  fqscreen_rrna_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_rrna_config.conf' # Setting for Biowulf
+
+
+
+
 #########################################################################################
 # CTK parameters
 #########################################################################################
 
 CTK:
-  minimum_peak_height: 30
-
+  minimum_peak_height: 5
 
 
