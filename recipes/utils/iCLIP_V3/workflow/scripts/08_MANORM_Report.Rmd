@@ -106,12 +106,12 @@ Peaks_Anno = peak_in
 
 Peaks_Anno$Same_Comb_type = 
     factor(peak_in$Same_Comb_type, 
-           levels = c("ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
+           levels = c("rRNA", "ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
                       "Antisense Feature", "protein_coding: Intronic", "lncRNA: Intronic", "lncRNA: Exonic","no Feature"))  
 
 Peaks_Anno$Oppo_Comb_type = 
     factor(peak_in$Oppo_Comb_type, 
-           levels = c("ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
+           levels = c("rRNA", "ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
                       "Antisense Feature", "protein_coding: Intronic", "lncRNA: Intronic", "lncRNA: Exonic","no Feature"))  
 
 ###### remove chrM clip peaks
@@ -130,7 +130,7 @@ Peaks_Anno$Same_ncRNA <-  gsub(' misc_RNA','',Peaks_Anno$Same_ncRNA)
 Peaks_Anno$Same_ncRNA <-  gsub(' ','',Peaks_Anno$Same_ncRNA)
 Peaks_Anno$Same_ncRNA <-  gsub(',','',Peaks_Anno$Same_ncRNA)
 
-Peaks_Anno$Same_ncRNA[grep("BK000964", Peaks_Anno$chrom)] <- 'rRNA'
+#Peaks_Anno$Same_ncRNA[grep("BK000964", Peaks_Anno$chrom)] <- 'rRNA'
 Peaks_Anno=Peaks_Anno[!Peaks_Anno$chrom%in%'GL',]
 Peaks_Anno=Peaks_Anno[!Peaks_Anno$chrom%in%'JH',]
 Peaks_Anno=Peaks_Anno[!Peaks_Anno$chrom%in%'K',]
@@ -141,8 +141,9 @@ Peaks_Anno$PlotColumn=as.character(Peaks_Anno$PlotColumn)
 Peaks_Anno[Peaks_Anno$Same_Repeat%in%'rRNA','PlotColumn']='rRNA'
 Peaks_Anno[Peaks_Anno$Same_ncRNA%in%'yRNA','PlotColumn']='yRNA'
 
-Peaks_Anno$Counts_Unique <- Peaks_Anno$Counts_unique
-
+Peaks_Anno$Counts_Unique <- Peaks_Anno$Counts_unique_Sample
+Peaks_Anno$Counts_fracMM <- Peaks_Anno$Counts_fracMM_Sample
+Peaks_Anno$Counts_Total <- Peaks_Anno$Counts_fracMM_Sample_Total
 ```
 
 
@@ -379,7 +380,7 @@ print(head(Peaks_Anno))
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
 if (incd_rRNA==FALSE) {
-  p=p[!p$Same_Repeat%in%'rRNA',]
+  p=p[!p$Same_Comb_type%in%'rRNA',]
 }
 if (nrow(p)>0) {
 #change types
@@ -403,7 +404,7 @@ p$PlotColumn=p$Same_Comb_type
 ###phil need else statement?###
 #check if this makes sense?
 if (incd_rRNA==FALSE) {
-  p=p[!p$Same_ncRNA%in%'rRNA',]
+  p=p[!p$Same_Comb_type%in%'rRNA',]
 } else{
   p=p
 }
@@ -444,7 +445,7 @@ if (nrow(p)>0) {
 ```{r PeaksPerCategory_NO_rRNA, fig.asp=.5, fig.align='center',fig.height=4, fig.width=8,echo=F,warning=F,eval=T,include=T}
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
-p=p[!p$Same_ncRNA%in%'rRNA',]
+p=p[!p$Same_Comb_type%in%'rRNA',]
 if (nrow(p)>0) {
 p[is.na(p$Same_Comb_type),'PlotColumn']='no Feature'
 colnames(p)[colnames(p)%in%'PlotColumn']='RNA_Type'
@@ -463,7 +464,7 @@ ggplotly(gg)
 ```{r PeaksPer_NCRNA_Category_NO_rRNA, fig.asp=.5, fig.align='center',fig.height=4, fig.width=8,echo=F,warning=F,eval=T,include=T}
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
-p=p[!p$Same_ncRNA%in%'rRNA',]
+p=p[!p$Same_Comb_type%in%'rRNA',]
 p=p[p$PlotColumn%in%'ncRNA','Same_ncRNA',drop=F]
 #if there are remaining types
 if (nrow(p)>0) {
@@ -493,7 +494,7 @@ if (nrow(p)>0) {
 ```{r PeaksPerCategory_NO_rRNA_unique, fig.asp=.5, fig.align='center',fig.height=4, fig.width=8,echo=F,warning=F,eval=T,include=T}
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
-p=p[!p$Same_ncRNA%in%'rRNA',]
+p=p[!p$Same_Comb_type%in%'rRNA',]
 p=p[p$Counts_Unique > 0,]
 if (nrow(p)>0) {
 p[is.na(p$Same_Comb_type),'PlotColumn']='no Feature'
@@ -513,7 +514,7 @@ ggplotly(gg)
 ```{r PeaksPer_NCRNA_Category_NO_rRNA_unique, fig.asp=.5, fig.align='center',fig.height=4, fig.width=8,echo=F,warning=F,eval=T,include=T}
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
-p=p[!p$Same_ncRNA%in%'rRNA',]
+p=p[!p$Same_Comb_type%in%'rRNA',]
 p=p[p$Counts_Unique > 0,]
 p=p[p$PlotColumn%in%'ncRNA','Same_ncRNA',drop=F]
 #if there are remaining types
@@ -551,7 +552,7 @@ if (nrow(p)>0) {
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
 p$PlotColumn=as.character(p$PlotColumn)
-p[p$Same_Repeat%in%'rRNA','PlotColumn']='rRNA'
+#p[p$Same_Repeat%in%'rRNA','PlotColumn']='rRNA'
 p[p$Same_ncRNA%in%'yRNA','PlotColumn']='yRNA'
 p$PlotColumn=factor(p$PlotColumn, levels = c("ncRNA",
                                               "rRNA",
@@ -637,7 +638,7 @@ ggplotly(gg2)
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
 p$PlotColumn=as.character(p$PlotColumn)
-p[p$Same_Repeat%in%'rRNA','PlotColumn']='rRNA'
+#p[p$Same_Repeat%in%'rRNA','PlotColumn']='rRNA'
 p[p$Same_ncRNA%in%'yRNA','PlotColumn']='yRNA'
 p$PlotColumn=factor(p$PlotColumn, levels = c("ncRNA",
                                              "rRNA",
@@ -720,7 +721,7 @@ plot(gg2)
 p=Peaks_Anno
 p$PlotColumn=p$Same_Comb_type
 if (incd_rRNA==FALSE) {
-  p=p[!p$Same_Repeat%in%'rRNA',]
+  p=p[!p$Same_Comb_type%in%'rRNA',]
 }
 colnames(p)[colnames(p)%in%'PlotColumn']='RNA_Type'
 if (nrow(p)>0) {
@@ -729,7 +730,7 @@ plot
 gg = ggplot(p,aes(x=RNA_Type,y=Counts_Unique,fill=RNA_Type)) +
             geom_violin() +
             theme_classic() +
-            geom_jitter(height = 0, width = 0.1,size=0.5,aes(text=ID)) +
+            geom_jitter(height = 0, width = 0.1,size=0.5) +
             scale_y_continuous(trans = "log2", oob = squish_infinite) +
             ggtitle('Peak Counts (Unique) for\nby Feature') +
             ylab("Counts") +
@@ -754,7 +755,7 @@ p$PlotColumn=p$Same_ncRNA
   p=p[p$Same_Comb_type%in%'ncRNA',]
 colnames(p)[colnames(p)%in%'PlotColumn']='RNA_Type'
 if (nrow(p)>0) {
-  p$ID=paste0(p$ID,"\n",p$Same_gene_name_comb)
+  p$ID=paste0(p$PeakID,"\n",p$Same_gene_name_comb)
   
   if(length(unique(p$RNA_Type)[unique(p$RNA_Type)%in%names(nc_color)==F])>0){
   print(paste0('unexpected ncRNA category: ',unique(p$RNA_Type)[unique(p$RNA_Type)%in%names(nc_color)==F]))
@@ -765,7 +766,7 @@ plot
 gg = ggplot(p, aes(x=RNA_Type,y=Counts_Unique,fill=RNA_Type)) +
       geom_violin() +
       theme_classic() +
-      geom_jitter(height = 0, width = 0.1,size=0.5,aes(text=ID)) +
+      geom_jitter(height = 0, width = 0.1,size=0.5) +
       scale_y_continuous(trans = "log2", oob = squish_infinite) +
       ggtitle('Peak Counts (Unique) for\nby ncRNA Type') +
       ylab("Counts") +
@@ -799,7 +800,7 @@ p$RNA=''
 gg=ggplot(p,aes(x=RNA_Type,y=Counts_fracMM,fill=RNA_Type)) +
     geom_violin() +
     theme_classic() +
-    geom_jitter(height = 0, width = 0.1,size=0.5,aes(text=ID)) +
+    geom_jitter(height = 0, width = 0.1,size=0.5) +
     scale_y_continuous(trans = "log2", oob = squish_infinite) +
     ggtitle('Peak Counts (Unique + Frac. MM)\nby Feature') +
     ylab("Counts") +
@@ -824,7 +825,7 @@ p$PlotColumn=p$Same_ncRNA
   p=p[p$Same_Comb_type%in%'ncRNA',]
 colnames(p)[colnames(p)%in%'PlotColumn']='RNA_Type'
 if (nrow(p)>0) {
-p$ID=paste0(p$ID,"\n",p$Same_gene_name_comb)
+p$ID=paste0(p$PeakID,"\n",p$Same_gene_name_comb)
   
 if(length(unique(p$RNA_Type)[unique(p$RNA_Type)%in%names(nc_color)==F])>0){
   print(paste0('unexpected ncRNA category: ',unique(p$RNA_Type)[unique(p$RNA_Type)%in%names(nc_color)==F]))
@@ -835,7 +836,7 @@ if(length(unique(p$RNA_Type)[unique(p$RNA_Type)%in%names(nc_color)==F])>0){
   gg=ggplot(p,aes(x=RNA_Type,y=Counts_fracMM,fill=RNA_Type)) +
       geom_violin() +
       theme_classic() +
-      geom_jitter(height = 0, width = 0.05,size=.5,aes(text=ID)) +
+      geom_jitter(height = 0, width = 0.05,size=.5) +
       scale_y_continuous(trans = "log2", oob = squish_infinite) +
       ggtitle('Peak Counts (Unique + Frac. MM)\nby ncRNA Type') +
       ylab("Counts") +

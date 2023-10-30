@@ -73,7 +73,7 @@ incd_rRNA=T
 
 ```{r SetColorSchemes, echo=F, message=FALSE, warning=FALSE, eval=T, include=F,results=F,}
 nc_color= c(
-  'rRNA'=  "#1fb487"  ,
+  'rRNA'=  "#1fb487",
   'yRNA'= "#A6CEE3",
   'snRNA'= "#1F78B4",
   'snoRNA'="#B2DF8A" ,
@@ -115,12 +115,12 @@ Peaks_Anno = peak_in
 
 Peaks_Anno$Same_Comb_type = 
     factor(peak_in$Same_Comb_type, 
-           levels = c("ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
+           levels = c("rRNA", "ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
                       "Antisense Feature", "protein_coding: Intronic", "lncRNA: Intronic", "lncRNA: Exonic","no Feature"))  
 
 Peaks_Anno$Oppo_Comb_type = 
     factor(peak_in$Oppo_Comb_type, 
-           levels = c("ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
+           levels = c("rRNA", "ncRNA", "protein_coding: Exonic", "Repeat Element","pseudogene",
                       "Antisense Feature", "protein_coding: Intronic", "lncRNA: Intronic", "lncRNA: Exonic","no Feature"))  
 
 
@@ -267,9 +267,9 @@ ggplotly(pOppo,tooltip = c("x", "y"))
 
 Not all Peaks overlap with a single feature so peak assignments were assigned by priority:  
 
-<!-- **ncRNA > Protein coding : Exonic > repeats > Pseudogene > CHANGED: Antisense Feature > Protein Coding : Intronic > lncRNA > no Feature**    -->
+<!-- **rRNA > ncRNA > Protein coding : Exonic > repeats > Pseudogene > CHANGED: Antisense Feature > Protein Coding : Intronic > lncRNA > no Feature**    -->
 
-**ncRNA > protein_coding: Exonic > Repeat Element > pseudogene > lncRNA: Exonic > protein_coding: Intronic > lncRNA: Intronic > no Feature**
+**rRNA > ncRNA > protein_coding: Exonic > Repeat Element > pseudogene > lncRNA: Exonic > protein_coding: Intronic > lncRNA: Intronic > no Feature**
 
 All annotations from RNA type, Repeat regions, and Intronic/exonic regions are annotated in the Table.   
 
@@ -280,7 +280,9 @@ All annotations from RNA type, Repeat regions, and Intronic/exonic regions are a
 ### VI. Overview of targets by CLIP peak category   
 
 
+
 ```{r PeakCategories, echo=F, include=T, eval=T, fig.align='default', fig.ncol=2, fig.height=3.5, fig.width=7, out.height=200, out.width="50%", fig.show="hold", layout='l-screen', results = FALSE, message=FALSE , warning=F}
+
 
 
 #Plot 1
@@ -937,7 +939,7 @@ if (nrow(p)>0) {
 colnames(p)[colnames(p)%in%'Oppo_Comb_type']='RNA_Type'
 p$RNA=''
 #plot
-ggplot(p,aes(fill=RNA_Type,x=RNA_Type)) +
+gg = ggplot(p,aes(fill=RNA_Type,x=RNA_Type)) +
   geom_bar(stat="count") +
   theme_classic() +
   ggtitle("Opposite Strand Feature - Number of peaks by category") +
@@ -947,7 +949,8 @@ ggplot(p,aes(fill=RNA_Type,x=RNA_Type)) +
         axis.text = element_text(size=10),
         legend.position = "none",
         axis.text.x = element_text(angle = -45,vjust = .5)) +
-  scale_fill_manual(values=class_color) 
+  scale_fill_manual(values=class_color)
+ggplotly(gg)
 }else {print("No Features")}
 ```
 
@@ -971,7 +974,7 @@ gg = ggplot(p,aes(fill=Same_Comb_type,x=factor(Oppo_Comb_type))) +
       xlab("Antisense strand Annotation") +
       ylab("Peak Count") +
       labs(fill = "Sense Stand Annotation") +
-      theme(plot.title = element_text(hjust = 0.5,size=20),
+      theme(plot.title = element_text(hjust = 0.5),
             axis.title = element_text(size=15),
             axis.text = element_text(size=10),
             legend.position = "right",

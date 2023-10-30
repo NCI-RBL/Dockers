@@ -48,11 +48,17 @@ def CombineTypes(row):
         if row[strand+'_ncRNA'] != '.':
             row[strand+'_Comb_type'] = 'ncRNA' 
 
+        if 'rRNA' in row[strand+'_Repeat']:
+            row[strand+'_Comb_type'] = 'rRNA'
+
+        if row['chrom'] == 'BK000964.3':
+            row[strand+'_Comb_type'] = 'rRNA'
+
     return row
 
 
 
-def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df):
+def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, SameStrandUTRs_df, OppoStrandUTRs_df):
 
     # Create empty dataframe
     Out_df = pd.DataFrame(columns = ['ID', 'chrom', 'start', 'end', 'score', 'strand', 'Length', 'Counts_Unique', 'Counts_fracMM', 'Counts_Total',\
@@ -69,10 +75,18 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     SameStrandMerged_df = SameStrandGen_df.merge(SameStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
     SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandRMSK_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
     SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
+    #print(SameStrandMerged_df.dtypes)
+    #print(SameStrandUTRs_df.dtypes)
+
+    SameStrandMerged_df = SameStrandMerged_df.merge(SameStrandUTRs_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
 
     OppoStrandMerged_df = OppoStrandGen_df.merge(OppoStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
     OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandRMSK_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
     OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandNCRNA_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
+    #print(OppoStrandMerged_df.dtypes)
+    #print(OppoStrandUTRs_df.dtypes)
+
+    OppoStrandMerged_df = OppoStrandMerged_df.merge(OppoStrandUTRs_df, how='outer', on=['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total'])
     
     Out_df[['ID', 'chrom', 'start', 'end', 'score', 'strand', 'Length', 'Counts_Unique', 'Counts_fracMM','Counts_Total']] = SameStrandMerged_df[['ID', 'chrom', 'start', 'end', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total']]
     Out_df['Same_ensembl_gene_id'] = SameStrandMerged_df['gene_id']
@@ -87,6 +101,7 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     #Out_df['Same_exon_LargeOL'] = SameStrandMerged_df['???'] FROM BEDTOOLS INTERSECT?
     Out_df['Same_Repeat'] = SameStrandMerged_df['repClass']
     Out_df['Same_ncRNA'] = SameStrandMerged_df['ncrnaName']
+    Out_df['Same_UTR'] = SameStrandMerged_df['UTR']
 
     Out_df['Oppo_ensembl_gene_id'] = OppoStrandMerged_df['gene_id']
     Out_df['Oppo_external_gene_name'] = OppoStrandMerged_df['gene_name']
@@ -100,6 +115,7 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     #Out_df['Oppo_exon_LargeOL'] = OppoStrandMerged_df['???'] FROM BEDTOOLS INTERSECT?    
     Out_df['Oppo_Repeat'] = OppoStrandMerged_df['repClass']
     Out_df['Oppo_ncRNA'] = OppoStrandMerged_df['ncrnaName']
+    Out_df['Oppo_UTR'] = OppoStrandMerged_df['UTR']
 
     Out_df = Out_df.apply(CombineTypes, axis=1)
 
@@ -194,6 +210,18 @@ def ProcessNCRNA(InputFile):
     NCRNA_df.iloc[:, 10:] = NCRNA_df.iloc[:, 10:].applymap(lambda x: ', '.join(set(x.strip().replace(' ', '').replace('nan,', '').replace('nan', '').split(','))))
     return(NCRNA_df)
 
+def ProcessUTR(InputFile):
+    UTR_df = pd.read_csv(InputFile, sep = '\t', header = None, \
+                names = ['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM','counts_total',\
+                         'UTR', 'chrom_dup', 'UTR_start', 'UTR_end', 'UTR_ID', 'UTR_score', 'UTR_strand', 'dummy'])
+    UTR_df.iloc[:, 10:] = UTR_df.iloc[:, 10:].astype('str') # change type necessary for aggregate
+
+    UTR_df = UTR_df.groupby(['chrom', 'start', 'end', 'ID', 'score', 'strand', 'length', 'counts_unique', 'counts_fracMM',\
+                               'counts_total']).agg({'UTR'  : ', '.join}).reset_index()
+
+    #print(InputFile)
+    #print(UTR_df.dtypes)
+    return(UTR_df)
 
 def main():
 
@@ -202,10 +230,12 @@ def main():
     parser.add_argument('--SameStrandGenCode', type=str, required=True)
     parser.add_argument('--SameStrandIntrons', type=str, required=True)
     parser.add_argument('--SameStrandncRNA', type=str, required=True)
+    parser.add_argument('--SameStrandUTRs', type=str, required=True)
     parser.add_argument('--OppoStrandRMSK', type=str, required=True)
     parser.add_argument('--OppoStrandGenCode', type=str, required=True)
     parser.add_argument('--OppoStrandIntrons', type=str, required=True)
     parser.add_argument('--OppoStrandncRNA', type=str, required=True)
+    parser.add_argument('--OppoStrandUTRs', type=str, required=True)
     parser.add_argument('--Output', type=str, required=True)
 
 
@@ -214,13 +244,15 @@ def main():
     SameStrandGen_df = ProcessGencode(args.SameStrandGenCode)
     SameStrandIntrons_df = ProcessIntrons(args.SameStrandIntrons)
     SameStrandNCRNA_df = ProcessNCRNA(args.SameStrandncRNA)
+    SameStrandUTRs_df = ProcessUTR(args.SameStrandUTRs)
 
     OppoStrandRMSK_df = ProcessRMSK(args.OppoStrandRMSK)
     OppoStrandGen_df = ProcessGencode(args.OppoStrandGenCode)
     OppoStrandIntrons_df = ProcessIntrons(args.OppoStrandIntrons)
     OppoStrandNCRNA_df = ProcessNCRNA(args.OppoStrandncRNA)
+    OppoStrandUTRs_df = ProcessUTR(args.OppoStrandUTRs)
 
-    Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df)
+    Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, SameStrandUTRs_df, OppoStrandUTRs_df)
     Out_df.to_csv(args.Output, sep = '\t', index=False)
 
 if __name__ == '__main__':

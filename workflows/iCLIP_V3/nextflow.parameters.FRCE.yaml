@@ -1,5 +1,34 @@
 
+
+#########################################################################################
+# Manifests
+#########################################################################################
+
+manifests:
+  - name: multiplex.tsv
+    content: |
+      file_name,multiplex
+      PARiCLIP_mRO3_S1_R1_001.fastq.gz,clip3
+  - name: samples.tsv
+    content: |
+      multiplex,sample,group,barcode,adaptor
+      clip3,YKO_Clip3,CLIP,NNNNNGATCTGNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Ro_Clip3,CLIP,NNNNNATTGGCNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Control_Clip3,CNTRL,NNNNNCACTGTNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Y1KO_Clip3,CLIP,NNNNNTACAAGNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Y3KO_Clip3,CLIP,NNNNNTTTCACNNNN,AGATCGGAAGAGCGGTTCAG
+  - name: barcodes.tsv
+    content: |
+      NNNNNGATCTGNNNN:YKO_Clip3
+      NNNNNATTGGCNNNN:Ro_Clip3
+      NNNNNCACTGTNNNN:Control_Clip3
+      NNNNNTACAAGNNNN:Y1KO_Clip3
+      NNNNNTTTCACNNNN:Y3KO_Clip3
+
+
+#########################################################################################
 # Global parameters
+#########################################################################################
 
 workdir: '/mnt/rnabl-work/Guiblet/test_iCLIP' # working directory
 tempdir: '/mnt/rnabl-work/Guiblet/test_iCLIP/temp/' # Temp directory. 
@@ -24,11 +53,11 @@ samplenames:
 
 contrasts:
     - ['YKO_Clip3', 'Ro_Clip3']
-    - ['Y1KO_Clip3', 'Ro_Clip3']
-    - ['Y3KO_Clip3', 'Ro_Clip3']
-    - ['Ro_Clip3', 'YKO_Clip3']
-    - ['Ro_Clip3', 'Y1KO_Clip3']
-    - ['Ro_Clip3', 'Y3KO_Clip3']
+    #- ['Y1KO_Clip3', 'Ro_Clip3']
+    #- ['Y3KO_Clip3', 'Ro_Clip3']
+    #- ['Ro_Clip3', 'YKO_Clip3']
+    #- ['Ro_Clip3', 'Y1KO_Clip3']
+    #- ['Ro_Clip3', 'Y3KO_Clip3']
 
 barcodes:
   - 'NNNNNGATCTGNNNN:YKO_Clip3'
@@ -51,7 +80,7 @@ MANormWidth: 50 #Width of window to calculate read density. [any integer >1; def
 MNormDistance: 25 #Summit-to-summit distance cutoff for common peaks. [ any integer >1; default MANormWidth/2]
 MANormPValue: 0.005
 
-UniqueReadsInPeaks: 0.9
+UniqueReadsInPeaks: 0.5
 
 # FRCE 
 containerDir: "/mnt/rnabl-work/Guiblet/iCLIP/container"
@@ -84,15 +113,6 @@ mm10:
   aliaspath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
   additionalannopath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/additional_anno/'
 
-
-
-#########################################################################################
-# Manifests
-#########################################################################################
-manifests:
-  samples: '/mnt/rnabl-work/Guiblet/test_iCLIP/manifests/samples.tsv'
-  multiplex: '/mnt/rnabl-work/Guiblet/test_iCLIP/manifests/multiplex.tsv'
-  barcode: '/mnt/rnabl-work/Guiblet/test_iCLIP/manifests/clip3_barcode_manifest.txt'
 
 #########################################################################################
 # QC barcode parameters
@@ -169,7 +189,12 @@ QC_Screen_Validator:
   fqscreen_species_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_species_config.conf' # Setting for Biowulf
   fqscreen_rrna_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_rrna_config.conf' # Setting for Biowulf
 
+#########################################################################################
+# MultiQC parameters
+#########################################################################################
 
+MultiQC:
+  config: '/mnt/rnabl-work/Guiblet/iCLIP/multiqc_config.yaml'
 
 
 #########################################################################################
@@ -177,6 +202,7 @@ QC_Screen_Validator:
 #########################################################################################
 
 CTK:
-  minimum_peak_height: 5
+  minimum_peak_height: 30
+  minimum_peak_height_Transcriptome: 30
 
 

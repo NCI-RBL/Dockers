@@ -48,11 +48,17 @@ def CombineTypes(row):
         if row[strand+'_ncRNA'] != '.':
             row[strand+'_Comb_type'] = 'ncRNA' 
 
+        if 'rRNA' in row[strand+'_Repeat']:
+            row[strand+'_Comb_type'] = 'rRNA'
+
+        if row['chrom'] == 'BK000964.3':
+            row[strand+'_Comb_type'] = 'rRNA'
+
     return row
 
 
 
-def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, Counts_df):
+def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, CountsSample_df, CountsBackground_df):
 
     # Create empty dataframe
     Out_df = pd.DataFrame(columns = ['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background',\
@@ -63,7 +69,7 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
                                  'Oppo_ensembl_gene_id',   'Oppo_external_gene_name',    'Oppo_gene_type',\
                                  'Oppo_transcript_type',   'Oppo_transcript_name',       'Oppo_feature',\
                                  'Oppo_exon_number',       'Oppo_intron_number',         'Oppo_intron_Overlap',\
-                                 'Oppo_exon_Overlap',      'Oppo_Repeat',                'Oppo_ncRNA',           'Oppo_Comb_type'])
+                                 'Oppo_exon_Overlap',      'Oppo_Repeat',                'Oppo_ncRNA'])
 
 
     SameStrandMerged_df = SameStrandGen_df.merge(SameStrandIntrons_df, how='outer', on=['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background'])
@@ -76,8 +82,13 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     
     Out_df[['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background']] = SameStrandMerged_df[['chrom', 'start', 'end', 'type', 'score', 'strand', 'm_value', 'p_value', 'peak_group', 'normalized_read_density_sample', 'normalized_read_density_background']]
     #print(Out_df.dtypes)
-    #print(Counts_df.dtypes)
-    Out_df = Out_df.merge(Counts_df, how='left', on=['chrom', 'start', 'end', 'strand'])
+
+    CountsSample_df.columns = ['PeakID', 'chrom', 'start', 'end', 'strand', 'PeakLength', 'Counts_unique_Sample', 'Counts_fracMM_Sample', 'Counts_total_Sample']
+    CountsBackground_df.columns = ['PeakID', 'chrom', 'start', 'end', 'strand', 'PeakLength', 'Counts_unique_Background', 'Counts_fracMM_Background', 'Counts_total_Background']
+    #print(CountsSample_df)
+    #print(Out_df)
+    Out_df = Out_df.merge(CountsSample_df, how='left', on=['chrom', 'start', 'end', 'strand'])
+    Out_df = Out_df.merge(CountsBackground_df, how='left', on=['chrom', 'start', 'end', 'strand', 'PeakID', 'PeakLength'])
 
     Out_df['Same_ensembl_gene_id'] = SameStrandMerged_df['gene_id']
     Out_df['Same_external_gene_name'] = SameStrandMerged_df['gene_name']
@@ -199,7 +210,8 @@ def ProcessNCRNA(InputFile):
 
 def ProcessCounts(InputFile):
     Counts_df = pd.read_csv(InputFile, sep = '\t', header = 0)
-    #Counts_df = Counts_df.astype('str')
+    #Counts_df.iloc[:, 11:] = Counts_df.iloc[:, 11:].astype('str')
+    #Counts_df.iloc[:, 11:] = Counts_df.iloc[:, 11:].astype('str')
     Counts_df = Counts_df.rename(columns={"chr": "chrom"})
     return(Counts_df)
 
@@ -215,7 +227,8 @@ def main():
     parser.add_argument('--OppoStrandGenCode', type=str, required=True)
     parser.add_argument('--OppoStrandIntrons', type=str, required=True)
     parser.add_argument('--OppoStrandncRNA', type=str, required=True)
-    parser.add_argument('--Counts', type=str, required=True)
+    parser.add_argument('--CountsSample', type=str, required=True)
+    parser.add_argument('--CountsBackground', type=str, required=True)
     parser.add_argument('--Output', type=str, required=True)
 
 
@@ -230,9 +243,10 @@ def main():
     OppoStrandIntrons_df = ProcessIntrons(args.OppoStrandIntrons)
     OppoStrandNCRNA_df = ProcessNCRNA(args.OppoStrandncRNA)
 
-    Counts_df = ProcessCounts(args.Counts)
+    CountsSample_df = ProcessCounts(args.CountsSample)
+    CountsBackground_df = ProcessCounts(args.CountsBackground)
 
-    Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, Counts_df)
+    Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, CountsSample_df, CountsBackground_df)
     Out_df.to_csv(args.Output, sep = '\t', index=False)
 
 if __name__ == '__main__':

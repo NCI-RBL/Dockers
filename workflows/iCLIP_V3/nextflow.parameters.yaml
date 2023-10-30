@@ -1,8 +1,36 @@
 
-# Global parameters
 
-workdir: '/data/RBL_NCI/WilTemp/iCLIP_v3.0.1' # working directory
-tempdir: '/data/RBL_NCI/WilTemp/iCLIP_v3.0.1/temp/' # Temp directory. 
+#########################################################################################
+# Manifests
+#########################################################################################
+
+manifests:
+  - name: multiplex.tsv
+    content: |
+      file_name,multiplex
+      PARiCLIP_mRO3_S1_R1_001.fastq.gz,clip3
+  - name: samples.tsv
+    content: |
+      multiplex,sample,group,barcode,adaptor
+      clip3,YKO_Clip3,CLIP,NNNNNGATCTGNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Ro_Clip3,CLIP,NNNNNATTGGCNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Control_Clip3,CNTRL,NNNNNCACTGTNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Y1KO_Clip3,CLIP,NNNNNTACAAGNNNN,AGATCGGAAGAGCGGTTCAG
+      clip3,Y3KO_Clip3,CLIP,NNNNNTTTCACNNNN,AGATCGGAAGAGCGGTTCAG
+  - name: barcodes.tsv
+    content: |
+      NNNNNGATCTGNNNN:YKO_Clip3
+      NNNNNATTGGCNNNN:Ro_Clip3
+      NNNNNCACTGTNNNN:Control_Clip3
+      NNNNNTACAAGNNNN:Y1KO_Clip3
+      NNNNNTTTCACNNNN:Y3KO_Clip3
+
+#########################################################################################
+# Global parameters
+#########################################################################################
+
+workdir: '/data/RBL_NCI/WilTemp/iCLIP_v3.1.0' # working directory
+tempdir: '/data/RBL_NCI/WilTemp/iCLIP_v3.1.0/temp/' # Temp directory. 
 
 sourcedir: '/opt2/' # source directory. Do NOT change if using containers.
 
@@ -49,7 +77,7 @@ MANormWidth: 50 #Width of window to calculate read density. [any integer >1; def
 MNormDistance: 25 #Summit-to-summit distance cutoff for common peaks. [ any integer >1; default MANormWidth/2]
 MANormPValue: 0.005
 
-UniqueReadsInPeaks: 0.5
+UniqueReadsInPeaks: 0.5 # Percentage
 
 # BIOWULF
 containerDir: "/data/CCBR_Pipeliner/Pipelines/iCLIP/container"
@@ -71,6 +99,7 @@ hg38:
   rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
   aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
   additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/additional_anno/'
+  utrpath: '/data/RBL_NCI/WilTemp/iCLIP_v3.0.1/'
 mm10:
   stardir: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/mm10/index'
   stargtf: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
@@ -81,16 +110,9 @@ mm10:
   rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
   aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
   additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/additional_anno/'
+  utrpath: '/data/RBL_NCI/WilTemp/iCLIP_v3.0.1/'
 
 
-
-#########################################################################################
-# Manifests
-#########################################################################################
-manifests:
-  samples: '/data/RBL_NCI/WilTemp/iCLIP/manifests/samples.tsv'
-  multiplex: '/data/RBL_NCI/WilTemp/iCLIP/manifests/multiplex.tsv'
-  barcode: '/data/RBL_NCI/WilTemp/iCLIP/manifests/clip3_barcode_manifest.txt'
 
 #########################################################################################
 # QC barcode parameters
@@ -164,11 +186,16 @@ featureCounts:
 
 QC_Screen_Validator:
   threads: '64'
-  fqscreen_species_config: '/opt2/fqscreen_species_config.conf' # Setting for Biowulf
-  fqscreen_rrna_config: '/opt2/fqscreen_rrna_config.conf' # Setting for Biowulf
+  fqscreen_species_config: '/data/RBL_NCI/WilTemp/iCLIP/config/fqscreen_species_config.conf' # Setting for Biowulf
+  fqscreen_rrna_config: '/data/RBL_NCI/WilTemp/iCLIP/config/fqscreen_rrna_config.conf' # Setting for Biowulf
 
 
+#########################################################################################
+# MultiQC parameters
+#########################################################################################
 
+MultiQC:
+  config: '/data/RBL_NCI/WilTemp/iCLIP/config/multiqc_config.yaml'
 
 #########################################################################################
 # CTK parameters
@@ -176,5 +203,6 @@ QC_Screen_Validator:
 
 CTK:
   minimum_peak_height: 30
+  minimum_peak_height_Transcriptome: 30
 
 

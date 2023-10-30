@@ -10,11 +10,15 @@ COPY workflow/scripts/08_MANORM_Report.Rmd /opt2/
 COPY workflow/scripts/06_annotation.Rmd /opt2/
 COPY workflow/scripts/AnnotationFormat.py /opt2/
 COPY workflow/scripts/MANORM_AnnotationFormat.py /opt2/
+COPY workflow/scripts/MergeGeneIDs.py /opt2/
+COPY workflow/scripts/MergeGeneIDsMANORM.py /opt2/
 
 RUN chmod 774 /opt2/08_MANORM_Report.Rmd && \
     chmod 774 /opt2/06_annotation.Rmd && \
     chmod 774 /opt2/AnnotationFormat.py && \
-    chmod 774 /opt2/MANORM_AnnotationFormat.py
+    chmod 774 /opt2/MANORM_AnnotationFormat.py && \
+    chmod 774 /opt2/MergeGeneIDs.py && \
+    chmod 774 /opt2/MergeGeneIDsMANORM.py
 
 
 # cleanup etc
