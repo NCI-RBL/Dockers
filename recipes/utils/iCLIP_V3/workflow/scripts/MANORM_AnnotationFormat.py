@@ -101,7 +101,7 @@ def MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, S
     #Out_df['Same_intron_LargeOL'] = SameStrandMerged_df['???'] FROM BEDTOOLS INTERSECT?
     #Out_df['Same_exon_LargeOL'] = SameStrandMerged_df['???'] FROM BEDTOOLS INTERSECT?
     Out_df['Same_Repeat'] = SameStrandMerged_df['repClass']
-    Out_df['Same_ncRNA'] = SameStrandMerged_df['ncrnaName']
+    Out_df['Same_ncRNA'] = SameStrandMerged_df['ncrnaClass']
 
     Out_df['Oppo_ensembl_gene_id'] = OppoStrandMerged_df['gene_id']
     Out_df['Oppo_external_gene_name'] = OppoStrandMerged_df['gene_name']

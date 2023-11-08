@@ -125,6 +125,7 @@ process Create_Project_Annotations {
         awk -v OFS='\t' '{if (\$10 == "snRNA" || \$10 == "snoRNA" || \$10 == "miRNA" || \$10 == "misc_RNA") print \$1, \$2, \$3, \$10, \$5, \$6}' !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
         cat !{params."${params.reference}".additionalannopath}/"${params.reference}"_tRNA.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
         awk -v OFS='\t' '{print \$1, \$2, \$3, "rRNA", \$4, \$6 }' !{params."${params.reference}".additionalannopath}/"${params.reference}"_rRNA.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
+        awk -v OFS='\t' '{print \$1, \$2, \$3, "rRNA", \$4, \$6 }' !{params."${params.reference}".additionalannopath}/mouse_rDNA_BK000964.3.anno.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
 
         """
 }
@@ -765,7 +766,7 @@ process Peak_Annotation {
 
 
 
-        python !{params.sourcedir}/AnnotationFormat.py \\
+        python !{params.workdir}/AnnotationFormat.py \\
           --SameStrandRMSK !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.rmsk.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandGenCode !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.gencode.!{params.reference}.intersect.SameStrand.bed \\
           --SameStrandIntrons !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed \\
@@ -796,7 +797,7 @@ process Annotation_Report {
 
     shell:
         """
-        # 
+        # #
 
         cp !{params.sourcedir}/06_annotation.Rmd !{params.tempdir}/
 
@@ -1038,8 +1039,8 @@ process Manorm_Report {
         -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.bed \\
         -b !{params.workdir}/04_annotation/01_project/ncRNA.bed \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.ncRNA.!{params.reference}.intersect.OppoStrand.bed
-
-        python !{params.sourcedir}/MANORM_AnnotationFormat.py \\
+        #
+        python !{params.workdir}/MANORM_AnnotationFormat.py \\
         --SameStrandRMSK !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.rmsk.!{params.reference}.intersect.SameStrand.bed \\
         --SameStrandGenCode !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.gencode.!{params.reference}.intersect.SameStrand.bed \\
         --SameStrandIntrons !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.KnownGene_introns.!{params.reference}.intersect.SameStrand.bed \\
