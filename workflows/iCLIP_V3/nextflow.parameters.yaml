@@ -36,11 +36,11 @@ sourcedir: '/opt2/' # source directory. Do NOT change if using containers.
 
 
 rawfilesnames: # list of raw files names
-#- 'PARiCLIP_mRO3_S1_R1_001'
+- 'PARiCLIP_mRO3_S1_R1_001'
   #- '2_PARiCLIP_mRO2_S1_R1_001'
   #- 'toyfile'
   #- 'toyfile2'
-  - 'toyfile3'
+ # - 'toyfile3'
 
 rawdir: '/data/RBL_NCI/WilTemp/iCLIP/rawfiles/' # directory for rawfiles
 
@@ -80,8 +80,8 @@ MANormPValue: 0.005
 UniqueReadsInPeaks: 0.5 # Percentage
 
 # BIOWULF
-containerDir: "/data/CCBR_Pipeliner/Pipelines/iCLIP/container"
-fastq_val: "/data/CCBR_Pipeliner/Pipelines/iCLIP/bin/fastQValidator"
+containerDir: "/data/RBL_NCI/iCLIP/container"
+fastq_val: "/data/RBL_NCI/iCLIP/bin/fastQValidator"
 
 
 #########################################################################################
@@ -90,28 +90,30 @@ fastq_val: "/data/CCBR_Pipeliner/Pipelines/iCLIP/bin/fastQValidator"
 
 # BIOWULF
 hg38:
-  stardir: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/hg38/index'
-  stargtf: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
-  gencodepath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
-  refseqpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
-  canonicalpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
-  intronpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
-  rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
-  aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
-  additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/hg38/additional_anno/'
-  utrpath: '/data/RBL_NCI/WilTemp/iCLIP_v3.0.1/'
+  stardir: '/data/RBL_NCI/iCLIP/index/active/2022_0505/hg38/index'
+  stargtf: '/data/RBL_NCI/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
+  gencodepath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
+  gencodedir: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/'
+  refseqpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
+  canonicalpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
+  intronpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
+  rmskpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
+  aliaspath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
+  additionalannopath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/additional_anno/'
+  utrpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/'
 mm10:
-  stardir: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/mm10/index'
-  stargtf: '/data/CCBR_Pipeliner/Pipelines/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
-  gencodepath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
-  refseqpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
-  canonicalpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
-  intronpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
-  rmskpath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
-  aliaspath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
-  additionalannopath: '/data/CCBR_Pipeliner/Pipelines/iCLIP/ref/annotations/mm10/additional_anno/'
-  utrpath: '/data/RBL_NCI/WilTemp/iCLIP_v3.0.1/'
-
+  stardir: '/data/RBL_NCI/iCLIP/index/active/2022_0505/mm10/index'
+  stargtf: '/data/RBL_NCI/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
+  gencodepath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
+  gencodedir: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/'
+  refseqpath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
+  canonicalpath: '/data/RBL_NCI/iCLIP//ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
+  intronpath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
+  rmskpath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
+  aliaspath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
+  additionalannopath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/additional_anno/'
+  utrpath: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/'
+  rRNAsubtypes: '/data/RBL_NCI/iCLIP/ref/annotations/mm10/additional_anno/mouse_rDNA_BK000964.3.anno.bed'
 
 
 #########################################################################################
