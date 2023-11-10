@@ -22,3 +22,6 @@ mkdocs build
 mkdocs gh-deploy
 ```
 
+# Workflow documentation
+
+For documentation on how to run the different worflows, please visit the [GitHub Page](https://nci-rbl.github.io/Dockers/).
