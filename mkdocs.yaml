@@ -112,3 +112,7 @@ nav:
     - Description: RiboFootPrint/descript.md
     - Initialize: RiboFootPrint/init.md
     - Run: RiboFootPrint/run.md
+  - iCLIP:
+    - Description: iCLIP/descript.md
+    - Initialize: iCLIP/init.md
+    - Run: iCLIP/run.md
