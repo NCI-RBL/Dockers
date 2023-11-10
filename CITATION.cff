@@ -1,0 +1,11 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: Guiblet
+  given-names: Wilfried
+orcid: https://orcid.org/0000-0001-6319-3418
+title:NCI-RBL/Dockers: Initial release
+version: 0.1.0
+doi:10.5281/zenodo.10107623
+url:https://zenodo.org/doi/10.5281/zenodo.10107622
+date-released: 2023-11-10
