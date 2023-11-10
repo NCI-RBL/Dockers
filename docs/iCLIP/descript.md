@@ -6,7 +6,7 @@ Steps of the pipeline:
 
 
  
-![alt text](https://github.com/NCI-RBL/Dockers/iCLIP_graph.png)
+![alt text](https://github.com/NCI-RBL/Dockers/blob/main/docs/iCLIP/iCLIP_graph.png?raw=true)
  
 
 For more questions about this pipeline, you may contact [Wilfried Guiblet](mailto:guibletwm@nih.gov).
