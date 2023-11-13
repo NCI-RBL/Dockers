@@ -732,7 +732,7 @@ process Peak_Annotation {
 
         bedtools intersect -s -wao \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
-          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.mm10.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.mm10.bed \\
+          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.!{params.reference}.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.!{params.reference}.bed \\
           -names 5UTR 3UTR \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.UTRs.!{params.reference}.intersect.SameStrand.bed
 
@@ -760,7 +760,7 @@ process Peak_Annotation {
 
         bedtools intersect -S -wao \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
-          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.mm10.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.mm10.bed \\
+          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.!{params.reference}.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.!{params.reference}.bed \\
           -names 5UTR 3UTR \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.UTRs.!{params.reference}.intersect.OppoStrand.bed
 
