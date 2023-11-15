@@ -83,8 +83,8 @@ MANormPValue: 0.005
 UniqueReadsInPeaks: 0.5
 
 # FRCE 
-containerDir: "/mnt/rnabl-work/Guiblet/iCLIP/container"
-fastq_val: "/mnt/rnabl-work/Guiblet/iCLIP/bin/fastQValidator"
+containerDir: "/mnt/rnabl-work/iCLIP/container"
+fastq_val: "/mnt/rnabl-work/iCLIP/bin/fastQValidator"
 
 
 #########################################################################################
@@ -93,25 +93,29 @@ fastq_val: "/mnt/rnabl-work/Guiblet/iCLIP/bin/fastQValidator"
 
 # FRCE
 hg38:
-  stardir: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/hg38/index'
-  stargtf: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
-  gencodepath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
-  refseqpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
-  canonicalpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
-  intronpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
-  rmskpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
-  aliaspath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
-  additionalannopath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/hg38/additional_anno/'
+  stardir: '/mnt/rnabl-work/iCLIP/index/active/2022_0505/hg38/index'
+  stargtf: '/mnt/rnabl-work/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
+  gencodepath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
+  gencodedir: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/Gencode_V32/'
+  refseqpath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
+  canonicalpath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
+  intronpath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
+  rmskpath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
+  aliaspath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
+  additionalannopath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/additional_anno/'
+  utrpath: '/mnt/rnabl-work/iCLIP/ref/annotations/hg38/Gencode_V32/'
 mm10:
-  stardir: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/mm10/index'
-  stargtf: '/mnt/rnabl-work/Guiblet/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
-  gencodepath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
-  refseqpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
-  canonicalpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
-  intronpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
-  rmskpath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
-  aliaspath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
-  additionalannopath: '/mnt/rnabl-work/Guiblet/iCLIP/ref/annotations/mm10/additional_anno/'
+  stardir: '/mnt/rnabl-work/iCLIP/index/active/2022_0505/mm10/index'
+  stargtf: '/mnt/rnabl-work/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
+  gencodepath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/gencode.vM23.annotation.gtf.txt'
+  gencodedir: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/'
+  refseqpath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/NCBI_RefSeq/GCF_000001635.26_GRCm38.p6_genomic.gtf.txt'
+  canonicalpath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownCanonical/KnownCanonical_GencodeM23_GRCm38.txt'
+  intronpath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/Gencode_VM23/fromUCSC/KnownGene/KnownGene_GRCm38_introns.bed'
+  rmskpath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/repeatmasker/rmsk_GRCm38.txt'
+  aliaspath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/mm10.chromAlias.txt'
+  additionalannopath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/additional_anno/'
+  utrpath: '/mnt/rnabl-work/iCLIP/ref/annotations/mm10/Gencode_VM23/fromGencode/'
 
 
 #########################################################################################
@@ -186,15 +190,15 @@ featureCounts:
 
 QC_Screen_Validator:
   threads: '64'
-  fqscreen_species_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_species_config.conf' # Setting for Biowulf
-  fqscreen_rrna_config: '/mnt/rnabl-work/Guiblet/iCLIP/fqscreen_rrna_config.conf' # Setting for Biowulf
+  fqscreen_species_config: '/mnt/rnabl-work/iCLIP/fqscreen_species_config.conf' # Setting for Biowulf
+  fqscreen_rrna_config: '/mnt/rnabl-work/iCLIP/fqscreen_rrna_config.conf' # Setting for Biowulf
 
 #########################################################################################
 # MultiQC parameters
 #########################################################################################
 
 MultiQC:
-  config: '/mnt/rnabl-work/Guiblet/iCLIP/multiqc_config.yaml'
+  config: '/mnt/rnabl-work/iCLIP/multiqc_config.yaml'
 
 
 #########################################################################################

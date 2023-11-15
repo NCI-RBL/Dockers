@@ -45,7 +45,7 @@ def CombineTypes(row):
             if str(row[strand+'_exon_number']) not in ['.', ' ', '']:
                 row[strand+'_Comb_type'] = 'protein_coding: Exonic'
 
-        if row[strand+'_ncRNA'] != '.':
+        if row[strand+'_ncRNA'] not in ['.', '-1']:
             row[strand+'_Comb_type'] = 'ncRNA' 
 
         if 'rRNA' in row[strand+'_Repeat']:
