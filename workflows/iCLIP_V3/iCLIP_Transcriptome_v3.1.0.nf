@@ -235,7 +235,7 @@ process Peak_Annotation {
 
         bedtools intersect -wa -wb -loj \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.toTranscriptome.bed \\
-          -b !{params.workdir}/GENCODE_VM23_knownGene_mm10.splice_sites.bed !{params.workdir}/GENCODE_VM23_knownGene_mm10.5UTR.bed !{params.workdir}/GENCODE_VM23_knownGene_mm10.3UTR.bed \\
+          -b !{params."${params.reference}".gencodedir}/GENCODE_VM23_knownGene_!{params.reference}.splice_sites.bed !{params."${params.reference}".gencodedir}/GENCODE_VM23_knownGene_!{params.reference}.5UTR.bed !{params."${params.reference}".gencodedir}/GENCODE_VM23_knownGene_!{params.reference}.3UTR.bed \\
           -names Splice_Sites 5UTR 3UTR \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.!{params.reference}.intersect.toTranscriptome.bed
 
@@ -392,7 +392,7 @@ process MANORM_Annotation {
 
         bedtools intersect -wa -wb -loj \\
           -a !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.toTranscriptome/!{sample}_vs_!{background}.peaks.AllCounts.!{sample}.bed \\
-          -b !{params.workdir}/GENCODE_VM23_knownGene_mm10.splice_sites.bed !{params.workdir}/GENCODE_VM23_knownGene_mm10.5UTR.bed !{params.workdir}/GENCODE_VM23_knownGene_mm10.3UTR.bed \\
+          -b !{params."${params.reference}".gencodedir}/GENCODE_VM23_knownGene_!{params.reference}.splice_sites.bed !{params."${params.reference}".gencodedir}/GENCODE_VM23_knownGene_!{params.reference}.5UTR.bed !{params."${params.reference}".gencodedir}/GENCODE_VM23_knownGene_!{params.reference}.3UTR.bed \\
           -names Splice_Sites 5UTR 3UTR \\
             > !{params.workdir}/05_demethod/02_analysis/!{sample}_vs_!{background}.toTranscriptome/!{sample}_vs_!{background}.peaks.intersect.!{sample}.bed
 
