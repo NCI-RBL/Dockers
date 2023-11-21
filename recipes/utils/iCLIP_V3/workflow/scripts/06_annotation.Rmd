@@ -133,6 +133,8 @@ Peaks_Anno=Peaks_Anno[Peaks_Anno$chrom%in%'chrM'==F,]
 
 Peaks_Anno$Same_ncRNA[grep("HY", Peaks_Anno$Same_ncRNA)] <- 'yRNA'
 Peaks_Anno$Same_ncRNA[grep("tRNA", Peaks_Anno$Same_ncRNA)] <- 'tRNA'
+Peaks_Anno$Same_ncRNA[grep("tRX", Peaks_Anno$Same_ncRNA)] <- 'tRNA'
+Peaks_Anno$Same_ncRNA[grep("Met", Peaks_Anno$Same_ncRNA)] <- 'tRNA'
 Peaks_Anno$Same_ncRNA[grep("7SK", Peaks_Anno$Same_ncRNA)] <- '7SKRNA'
 Peaks_Anno$Same_ncRNA <-  gsub('miRNA,','',Peaks_Anno$Same_ncRNA)
 Peaks_Anno$Same_ncRNA <-  gsub(' miRNA','',Peaks_Anno$Same_ncRNA)
@@ -626,10 +628,10 @@ p[p$Same_ncRNA%in%'yRNA','PlotColumn']='yRNA'
 p$PlotColumn=factor(p$PlotColumn, levels = c("ncRNA",
                                               "rRNA",
                                               "yRNA",
-                                              "protein_coding: exon",
+                                              "protein_coding: Exonic",
                                               "Repeat Element",
                                               "pseudogene",
-                                              "protein_coding: Intron",
+                                              "protein_coding: Intronic",
                                               "lncRNA",
                                               "no Feature"))#,
                                               #"Antisense Feature"))
@@ -637,10 +639,10 @@ p$PlotColumn=factor(p$PlotColumn, levels = c("ncRNA",
 u=c("ncRNA",
      "rRNA",
      "yRNA",
-     "protein_coding: exon",
+     "protein_coding: Exonic",
      "Repeat Element",
      "pseudogene",
-     "protein_coding: Intron",
+     "protein_coding: Intronic",
      "lncRNA",
      "no Feature")#,
      #"Antisense Feature",)
@@ -659,10 +661,10 @@ fcount$RNA_Type=factor(fcount$RNA_Type,
   levels = c("ncRNA",
              "rRNA",
              "yRNA",
-             "protein_coding: exon",
+             "protein_coding: Exonic",
              "Repeat Element",
              "pseudogene",
-             "protein_coding: Intron",
+             "protein_coding: Intronic",
              "lncRNA",
              "no Feature"))#,
              #"Antisense Feature"))
@@ -712,9 +714,9 @@ p[p$Same_ncRNA%in%'yRNA','PlotColumn']='yRNA'
 p$PlotColumn=factor(p$PlotColumn, levels = c("ncRNA",
                                              "rRNA",
                                              "yRNA",
-                                             "protein_coding: exon",
+                                             "protein_coding: Exonic",
                                              "Repeat Element","pseudogene",
-                                             "protein_coding: Intron",
+                                             "protein_coding: Intronic",
                                              "lncRNA",
                                              "no Feature"))#,
                                              #"Antisense Feature"))
