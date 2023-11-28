@@ -247,6 +247,8 @@ def main():
     CountsBackground_df = ProcessCounts(args.CountsBackground)
 
     Out_df = MergeDataframes(SameStrandGen_df, SameStrandIntrons_df, SameStrandRMSK_df, SameStrandNCRNA_df, OppoStrandGen_df, OppoStrandIntrons_df, OppoStrandRMSK_df, OppoStrandNCRNA_df, CountsSample_df, CountsBackground_df)
+
+    Out_df = Out_df[['chrom', 'start', 'end', 'm_value', 'normalized_read_density_sample', 'normalized_read_density_background', 'p_value', 'peak_group', 'score', 'strand', 'type', 'PeakID', 'Counts_fracMM_Sample', 'Counts_fracMM_Background', 'Counts_total_Sample', 'Counts_total_Background', 'Counts_unique_Sample', 'Counts_unique_Background', 'PeakLength', 'Same_Repeat', 'Same_ensembl_gene_id', 'Same_exon_Overlap', 'Same_exon_number', 'Same_external_gene_name', 'Same_feature', 'Same_gene_type', 'Same_intron_Overlap', 'Same_intron_number', 'Same_ncRNA', 'Same_transcript_name', 'Same_transcript_type', 'Same_Comb_type', 'Oppo_Repeat', 'Oppo_ensembl_gene_id', 'Oppo_exon_Overlap', 'Oppo_exon_number', 'Oppo_external_gene_name', 'Oppo_feature', 'Oppo_gene_type', 'Oppo_intron_Overlap', 'Oppo_intron_number', 'Oppo_ncRNA', 'Oppo_transcript_name', 'Oppo_transcript_type', 'Oppo_Comb_type']]
     Out_df.to_csv(args.Output, sep = '\t', index=False)
 
 if __name__ == '__main__':
