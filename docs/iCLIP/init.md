@@ -1,16 +1,4 @@
 ### Scripts
 
-Download all scripts from [RiboFootPrint GitHub repository](https://github.com/NCI-RBL/Dockers/tree/main/workflows/RiboFootPrint)
-
-### Index
-
-You can link the pre-made index folder for hg19 in the working directory:
-
-```bash
-ln -s /mnt/rnabl-work/Guiblet/CCRRBL12/index ./
-```
-
-### Set Parameters
-
-Update the file: RiboFootPrint.parameters.yaml 
+Download [workflows/iCLIP_V3/nextflow.parameters.yaml](https://github.com/NCI-RBL/Dockers/blob/main/workflows/iCLIP_V3/nextflow.parameters.yaml) in your directory. Update the parameters to fit your experiment.
 

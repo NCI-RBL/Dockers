@@ -1,20 +1,20 @@
 ### Run pipeline:
 
-Simply submit the pipeline as a slurm job:
+On biowulf,
 
+Load the latest version of the pipeline:
 ```bash
-sbatch RiboFootPrint.sh
+export PATH=$PATH:/data/RBL_NCI/iCLIP/latest/
 ```
 
-If your previous run was not completed and you wish to resume, resubmit the slurm job as:
-
+Run the pipeline with genomic coordinates:
 ```bash
-sbatch RiboFootPrint.sh -resume
+sbatch iCLIP_latest.sh "your_directory"
 ```
 
-
-Running this pipeline will download a Docker container in a folder named "work". To remove the container, delete the folder.
-
+After running with genomic coordinates, you can also run for transcriptomic coordinates:
 ```bash
-rm -r work
+sbatch iCLIP_Transcriptome_latest.sh "your_directory"
 ```
+
+You can add the option `-resume` to resume a failed/interrupted run.
