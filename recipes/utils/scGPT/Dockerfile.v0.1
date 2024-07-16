@@ -1,0 +1,23 @@
+FROM nciccbr/ccbr_ubuntu_base_20.04:v2.1  
+
+ENV TAG="v0.1"
+
+WORKDIR /opt2
+
+RUN python3 -m pip install --upgrade pip
+RUN pip install --ignore-installed PyYAML
+RUN pip install scgpt
+RUN pip install wandb
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
+

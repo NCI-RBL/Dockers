@@ -1,0 +1,37 @@
+FROM nciccbr/ccbr_ubuntu_base_20.04:v2.1  
+
+ENV TAG="v0.1"
+
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+#RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+RUN conda config --env --append channels conda-forge && \
+    conda config --env --append channels bioconda &&\
+    conda config --env --set restore_free_channel true
+
+
+WORKDIR /opt2
+
+# Install Depedencies
+RUN conda install -c conda-forge pyvcf
+RUN pip install gffutils biopython pandas pyfastx
+
+# Install Pangolin
+RUN git clone https://github.com/tkzeng/Pangolin.git && \
+    cd Pangolin && \
+    pip install .
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
