@@ -1,0 +1,45 @@
+FROM nciccbr/ccbr_ubuntu_base_20.04:v2.1  
+
+ENV TAG="v0.1"
+WORKDIR /opt2
+
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
+
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+RUN conda config --env --append channels conda-forge && \
+    conda config --env --append channels bioconda && \
+    conda config --env --set restore_free_channel true
+
+# Install awkde
+RUN git clone https://github.com/mennthor/awkde && \
+    pip install -e ./awkde
+
+# Install SMsplice
+RUN git clone https://github.com/kmccue/SMsplice/ && \
+    cd SMsplice && \
+    conda env create -f environment.yml 
+
+#SHELL ["conda", "run", "-n", "SMsplice", "/bin/bash", "-c"]
+#ENTRYPOINT ["pip", "install", "-e", "./awkde"]
+
+
+#RUN pip install -e ./awkde
+
+
+
+# cleanup etc
+COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+RUN chmod a+rX /opt2/Dockerfile.${TAG}
+WORKDIR /data2
+RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
