@@ -188,8 +188,8 @@ featureCounts:
 
 QC_Screen_Validator:
   threads: '64'
-  fqscreen_species_config: '/data/RBL_NCI/WilTemp/iCLIP/config/fqscreen_species_config.conf' # Setting for Biowulf
-  fqscreen_rrna_config: '/data/RBL_NCI/WilTemp/iCLIP/config/fqscreen_rrna_config.conf' # Setting for Biowulf
+  fqscreen_species_config: '/data/RBL_NCI/iCLIP/latest/config/fqscreen_species_config.conf' # Setting for Biowulf
+  fqscreen_rrna_config: '/data/RBL_NCI/iCLIP/latest/config/fqscreen_rrna_config.conf' # Setting for Biowulf
 
 
 #########################################################################################
@@ -197,7 +197,7 @@ QC_Screen_Validator:
 #########################################################################################
 
 MultiQC:
-  config: '/data/RBL_NCI/WilTemp/iCLIP/config/multiqc_config.yaml'
+  config: '/data/RBL_NCI/iCLIP/latest/config/multiqc_config.yaml'
 
 #########################################################################################
 # CTK parameters
