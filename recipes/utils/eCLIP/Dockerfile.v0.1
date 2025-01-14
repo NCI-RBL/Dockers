@@ -1,0 +1,92 @@
+FROM nciccbr/ccbr_ubuntu_22.04:v4
+#FROM continuumio/conda-ci-linux-64-python2.7  
+
+ENV TAG="v0.1"
+WORKDIR /opt2
+
+RUN git clone https://github.com/YeoLab/eclipdemux.git
+
+RUN git clone https://github.com/YeoLab/eCLIP.git
+
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
+
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+
+RUN conda config  --append channels conda-forge && \
+    conda config  --append channels bioconda && \
+    conda config  --append channels conda-forge && \
+    conda config  --set restore_free_channel true
+
+RUN conda create -n py27k anaconda python=2.7
+
+# Install dependencies:
+
+SHELL ["conda", "install", "-n", "py27k", "bedtools=2.27.1"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "cutadapt=1.14"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "fastqc=0.11.8"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "fastq-tools=0.8"]
+RUN
+#SHELL ["conda", "install", "-n", "py27k", "perl=5.10.1"]
+#SHELL ["conda", "install", "-n", "py27k", "perl"]
+SHELL ["conda", "install", "-n", "py27k", "bioconda::perl-statistics-basic"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::perl-statistics-distributions"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::perl-statistics-r"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "conda-forge::r-base"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::pysam"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "anaconda::numpy"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::samtools"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::star"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "anaconda::seaborn"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "iuc/label/outdated::ucsc_tools"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::umi_tools"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "brittainhard::cwlref-runner"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "conda-forge::cwltool"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::cwltest"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::galaxy-lib"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::toil"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "conda-forge::monotonic"]
+RUN
+SHELL ["conda", "install", "-n", "py27k", "bioconda::bioconductor-clipper"]
+RUN
+
+#SHELL ["git", "clone", "https://github.com/YeoLab/eclipdemux.git"]
+#RUN 
+
+#RUN git clone https://github.com/YeoLab/eclipdemux.git 
+
+
+# cleanup etc
+#COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+#RUN chmod a+rX /opt2/Dockerfile.${TAG}
+#WORKDIR /data2
+#RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
