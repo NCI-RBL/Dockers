@@ -72,6 +72,8 @@ SHELL ["conda", "install", "-n", "py27k", "conda-forge::monotonic"]
 RUN
 SHELL ["conda", "install", "-n", "py27k", "bioconda::bioconductor-clipper"]
 RUN
+SHELL ["conda", "install", "-n", "py27k", "conda-forge::nodejs"]
+RUN
 
 #SHELL ["git", "clone", "https://github.com/YeoLab/eclipdemux.git"]
 #RUN 

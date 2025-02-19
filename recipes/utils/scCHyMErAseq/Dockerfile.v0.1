@@ -1,0 +1,51 @@
+FROM nciccbr/ccbr_ubuntu_22.04:v4
+#FROM continuumio/conda-ci-linux-64-python3.9  
+
+ENV TAG="v0.1"
+WORKDIR /opt2
+
+
+# Install miniconda
+ENV CONDA_DIR /opt/conda
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+     /bin/bash ~/miniconda.sh -b -p /opt/conda
+
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+
+RUN conda config  --append channels conda-forge && \
+    conda config  --append channels bioconda && \
+    conda config  --append channels conda-forge && \
+    conda config  --set restore_free_channel true
+
+RUN conda create -n py39k anaconda python=3.9
+
+# Install dependencies:
+
+RUN pip install anndata
+RUN pip install scanpy
+RUN pip install mudata
+RUN pip install muon
+RUN pip install pertpy
+
+#SHELL ["pip", "install", "anndata"]
+#RUN
+
+#SHELL ["pip", "install", "-n", "py27k", "bedtools=2.27.1"]
+#RUN
+#SHELL ["conda", "install", "-n", "py27k", "conda-forge::nodejs"]
+#RUN
+
+
+# cleanup etc
+#COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
+#RUN chmod a+rX /opt2/Dockerfile.${TAG}
+#WORKDIR /data2
+#RUN apt-get clean
+
+# details
+LABEL maintainer="guibletwm@nih.gov"
+LABEL github_handle="wilfriedguiblet"
+ARG BUILD_DATE
+LABEL build_date=$BUILD_DATE
