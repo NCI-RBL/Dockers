@@ -5,7 +5,7 @@ on:
         branches: 
             - main
         paths:
-            - "recipes/utils/Whippet/**"
+            - "recipes/dev/**"
 
 permissions:
     contents: read
@@ -19,7 +19,7 @@ jobs:
             - uses: hellofresh/action-changed-files@v3
               id: metadata
               with:
-                pattern: recipes/utils/Whippet/(?P<image_dir>\w+)/.*
+                pattern: recipes/dev/(?P<image_dir>\w+)/.*
                 default-patterns: |
                     meta.yml
                     Dockerfile.v0.1
