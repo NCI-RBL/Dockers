@@ -25,7 +25,7 @@ jobs:
                 pattern: ${{ env.base_path }}/(?P<image_dir>\w+)/.*
                 default-patterns: |
                     meta.yml
-                    Dockerfile.v0.1
+                    Dockerfile
 
     update-docker:
         needs: [generate-matrix]
