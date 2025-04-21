@@ -5,7 +5,7 @@ ENV TAG="v0.1"
 WORKDIR /opt2
 
 # Set environment variables
-ENV JULIA_VERSION=1.6.7
+ENV JULIA_VERSION=1.7.3
 ENV JULIA_DIR=/opt/julia
 
 # Install miniconda
@@ -25,22 +25,22 @@ ENV JULIA_DIR=/opt/julia
 
 #RUN conda install conda-forge::julia-1.7.1
 
-RUN echo | curl -fsSL https://install.julialang.org | sh
-RUN juliaup add 1.6
+#RUN echo | curl -fsSL https://install.julialang.org | sh
+#RUN juliaup add 1.6
 
 # Download and extract Julia
-#RUN wget -q https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.7-linux-x86_64.tar.gz && \
-#    tar -xzf julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
-#    mv julia-$JULIA_VERSION /opt/julia && \
-#    ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
-#    rm julia-$JULIA_VERSION-linux-x86_64.tar.gz
+RUN wget -q https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.3-linux-x86_64.tar.gz && \
+    tar -xzf julia-$JULIA_VERSION-linux-x86_64.tar.gz && \
+    mv julia-$JULIA_VERSION /opt/julia && \
+    ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
+    rm julia-$JULIA_VERSION-linux-x86_64.tar.gz
 
-#RUN julia --version
+RUN julia --version
 
 # Install Whippet
 RUN git clone https://github.com/timbitz/Whippet.jl.git
 RUN cd Whippet.jl
-RUN julia +1.6 --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+RUN julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 
 
 
