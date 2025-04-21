@@ -35,11 +35,12 @@ RUN wget -q https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.7-lin
     ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
     rm julia-$JULIA_VERSION-linux-x86_64.tar.gz
 
+RUN julia --version
 
 # Install Whippet
 RUN git clone https://github.com/timbitz/Whippet.jl.git
 RUN cd Whippet.jl
-RUN julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+RUN julia +1.6 --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 
 
 
