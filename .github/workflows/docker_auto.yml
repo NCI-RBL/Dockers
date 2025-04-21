@@ -6,14 +6,14 @@ on:
             - main
         paths:
             - "recipes/dev/**"
+    workflow_dispatch:
 
 permissions:
     contents: read
 
 env:
-  base_path: recipes/dev
-
-  
+    base_path: recipes/dev
+    
 jobs:
     generate-matrix:
         runs-on: ubuntu-latest
