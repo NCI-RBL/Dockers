@@ -22,7 +22,7 @@ RUN conda config  --append channels conda-forge && \
 
 #RUN conda install conda-forge::julia-1.7.1
 
-RUN curl -fsSL https://install.julialang.org | sh
+RUN echo | curl -fsSL https://install.julialang.org | sh
 RUN juliaup add 1.6
 
 # Install Whippet
