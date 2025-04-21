@@ -6,7 +6,6 @@ on:
             - main
         paths:
             - "recipes/dev/**"
-    workflow_dispatch:
 
 permissions:
     contents: read
