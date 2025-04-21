@@ -9,18 +9,18 @@ ENV JULIA_VERSION=1.6.7
 ENV JULIA_DIR=/opt/julia
 
 # Install miniconda
-ENV CONDA_DIR /opt/conda
+#ENV CONDA_DIR /opt/conda
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-     /bin/bash ~/miniconda.sh -b -p /opt/conda
+#RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+#     /bin/bash ~/miniconda.sh -b -p /opt/conda
 
-ENV PATH=$CONDA_DIR/bin:$PATH
+#ENV PATH=$CONDA_DIR/bin:$PATH
 
 
-RUN conda config  --append channels conda-forge && \
-    conda config  --append channels bioconda && \
-    conda config  --append channels conda-forge && \
-    conda config  --set restore_free_channel true
+#RUN conda config  --append channels conda-forge && \
+#    conda config  --append channels bioconda && \
+#    conda config  --append channels conda-forge && \
+#    conda config  --set restore_free_channel true
 
 
 #RUN conda install conda-forge::julia-1.7.1
@@ -39,8 +39,8 @@ RUN julia --version
 
 # Install Whippet
 RUN git clone https://github.com/timbitz/Whippet.jl.git
-RUN cd Whippet.jl
-RUN julia +1.6 --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+#RUN cd Whippet.jl
+#RUN julia +1.6 --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 
 
 
