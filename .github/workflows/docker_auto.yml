@@ -10,6 +10,9 @@ on:
 permissions:
     contents: read
 
+env:
+  base_path: recipes/dev
+
 jobs:
     generate-matrix:
         runs-on: ubuntu-latest
@@ -19,7 +22,7 @@ jobs:
             - uses: hellofresh/action-changed-files@v3
               id: metadata
               with:
-                pattern: recipes/dev/(?P<image_dir>\w+)/.*
+                pattern: ${{ env.base_path }}/(?P<image_dir>\w+)/.*
                 default-patterns: |
                     meta.yml
                     Dockerfile.v0.1
@@ -35,7 +38,7 @@ jobs:
             - uses: pietrobolcato/action-read-yaml@1.0.0
               id: metadata
               with:
-                config: ${{ github.workspace }}/docker/${{ matrix.image_dir }}/meta.yml
+                config: ${{ github.workspace }}/${{ env.base_path }}/${{ matrix.image_dir }}/meta.yml
             - name: Get date
               id: date
               run: |
@@ -51,7 +54,7 @@ jobs:
               # only try building & pushing the container if parsing the metadata worked
               if: ${{ steps.metadata.outputs['container'] != '' }}
               with:
-                context: docker/${{ matrix.image_dir }}
+                context: ${{ env.base_path }}/${{ matrix.image_dir }}
                 # only push container to docker hub if not triggered from a PR
                 push: ${{ github.event_name != 'pull_request' }}
                 tags: ${{ steps.metadata.outputs['container'] }}
