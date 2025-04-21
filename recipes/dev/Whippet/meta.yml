@@ -1,4 +1,4 @@
-dockerhub_namespace: nciccbr
+dockerhub_namespace: wilfriedguiblet
 image_name: whippet1
 version: v0.1
 container: "$(dockerhub_namespace)/$(image_name):$(version)"
