@@ -20,7 +20,7 @@ RUN conda config  --append channels conda-forge && \
     conda config  --set restore_free_channel true
 
 
-RUN conda install conda-forge::julia-1.6.7
+RUN conda install conda-forge::julia-1.7.1
 
 # Install Whippet
 RUN git clone https://github.com/timbitz/Whippet.jl.git && \
