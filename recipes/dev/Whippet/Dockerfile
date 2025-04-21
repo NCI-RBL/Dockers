@@ -39,7 +39,7 @@ RUN julia --version
 
 # Install Whippet
 RUN git clone https://github.com/timbitz/Whippet.jl.git
-#RUN cd Whippet.jl
+RUN cd Whippet.jl
 #RUN julia +1.6 --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 
 
