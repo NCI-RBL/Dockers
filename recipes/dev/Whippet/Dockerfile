@@ -30,8 +30,8 @@ RUN git clone https://github.com/timbitz/Whippet.jl.git && \
 
 
 # cleanup etc
-COPY Dockerfile.${TAG} /opt2/Dockerfile.${TAG}
-RUN chmod a+rX /opt2/Dockerfile.${TAG}
+COPY Dockerfile /opt2/Dockerfile
+RUN chmod a+rX /opt2/Dockerfile
 WORKDIR /data2
 RUN apt-get clean
 
