@@ -14,9 +14,27 @@ copyright: Copyright &copy; {{ now().year }} CCBR
 
 # Configuration
 theme:
-  name: readthedocs
-  locale: en
-  custom_dir: docs/overrides
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.indexes
+    - toc.integrate 
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  logo: https://ccbr.github.io/HowTos/assets/images/doc-book.svg
+  favicon: assets/images/favicon.png
 
 # Plugins
 plugins:
