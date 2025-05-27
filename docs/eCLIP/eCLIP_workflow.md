@@ -40,6 +40,13 @@ ECLIP_DIR=$SCRIPT_DIR/eCLIP
 ls -l $ECLIP_DIR
 ```
 
+### Download custom scripts to run the pipeline on biowulf / FRCE
+
+1. [env.yml](https://github.com/NCI-RBL/Dockers/blob/main/workflows/eCLIP/src/env.yml)
+2. [post_process_eCLIP.py](https://github.com/NCI-RBL/Dockers/blob/main/workflows/eCLIP/src/post_process_eCLIP.py)
+3. [run.sh](https://github.com/NCI-RBL/Dockers/blob/main/workflows/eCLIP/src/run.sh)
+4. [summarize_merge_peaks_wf.py](https://github.com/NCI-RBL/Dockers/blob/main/workflows/eCLIP/src/summarize_merge_peaks_wf.py)
+
 ### Setting Up Required Files and Directories
 
 Directory locations should be based on the preferences of the user. As an example, we provide the following set up below as set up on FRCE. It is recommend that you separate the results or runs directory from the data directory. A full description of required files is located with links below:
