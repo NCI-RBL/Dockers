@@ -116,3 +116,5 @@ nav:
     - Description: iCLIP/descript.md
     - Initialize: iCLIP/init.md
     - Run: iCLIP/run.md
+  - eCLIP:
+    - Workflow : eCLIP/eCLIP_workflow.md
