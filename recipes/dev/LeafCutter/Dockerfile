@@ -18,7 +18,7 @@ RUN conda config  --append channels conda-forge && \
     conda config  --set restore_free_channel true
 
 
-RUN Rscript -e 'install.packages("stan", repos = "http://cran.us.r-project.org")'
+#RUN Rscript -e 'install.packages("stan", repos = "http://cran.us.r-project.org")'
 
 RUN conda install bioconductor-biobase bioconductor-dirichletmultinomial r-rcpp=1.0.10 r-rstan=2.21.7 r-stanheaders=2.21.0-7
 
