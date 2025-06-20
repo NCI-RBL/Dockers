@@ -1,0 +1,4 @@
+dockerhub_namespace: wilfriedguiblet
+image_name: leafcutter1
+version: v0.1
+container: "$(dockerhub_namespace)/$(image_name):$(version)"
