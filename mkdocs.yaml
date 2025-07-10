@@ -100,3 +100,7 @@ nav:
     - Run: iCLIP/run.md
   - eCLIP:
     - Workflow : eCLIP/eCLIP_workflow.md
+  - LEAFCUTTER:
+    - Description: LEAFCUTTER/descript.md
+    - Initialize: LEAFCUTTER/init.md
+    - Run: LEAFCUTTER/run.md
