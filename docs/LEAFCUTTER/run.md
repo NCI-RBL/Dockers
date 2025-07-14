@@ -50,7 +50,7 @@ done
 
 Repeat alignment for all samples. Leafcutter documentation recommends 4 samples per group mimimum.
 
-## Download and Run leafcutter container
+## Run leafcutter
 
 ### Set cache dir and download container
 
@@ -131,7 +131,15 @@ Rscript leafcutter/leafviz/prepare_results.R --meta_data_file groups_file.txt \
   -o Experiment.RData
 ```
 
-### Exit container. Run leafviz locally (for instance with RStudio)
+### Exit container
+
+```bash
+exit
+```
+
+## Run leafviz
+
+You can run leafviz locally (for instance within RStudio)
 
 ```r
 options(shiny.host = "0.0.0.0")
