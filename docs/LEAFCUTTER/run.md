@@ -1,4 +1,6 @@
-### Run STAR:
+# leafcutter workflow
+
+## Run STAR:
 
 Align your samples in twopassMode for more accurate junction calling:
 
@@ -36,7 +38,7 @@ samtools index -@ 64 -M ${sample}_Aligned.sorted.bam
 ```
 
 
-### Run regtools
+## Run regtools
 
 
 ```bash
@@ -48,14 +50,19 @@ done
 
 Repeat alignment for all samples. Leafcutter documentation recommends 4 samples per group mimimum.
 
-### Download and Run leafcutter container
+## Download and Run leafcutter container
+
+### Set cache dir and download container
 
 ```bash
 export SINGULARITY_CACHEDIR=$PWD/.singularity
 singularity pull --dir ./ leafcutter.sif docker://wilfriedguiblet/leafcutter:v0.1
 ```
 
-Create a juncfiles.txt. Example:
+### Create a juncfiles.txt
+
+Example:
+
 ```
 Sample1_Aligned.sorted.bam.junc
 Sample2_Aligned.sorted.bam.junc
@@ -67,28 +74,35 @@ Sample7_Aligned.sorted.bam.junc
 Sample8_Aligned.sorted.bam.junc
 ```
 
-Download custom leafcutter:
+### Download custom leafcutter repository
 
 git clone https://github.com/wilfriedguiblet/leafcutter.git
 
 
-Enter the container
+### Enter the container
+
 ```bash
-singularity shell -B $(pwd)/:/data2/,/data/RBL_NCI/:/data/RBL_NCI/ leafcutter.sif
+singularity shell -B $(pwd)/:/data2/ leafcutter.sif
+cd /data2/
 ```
 
-Cluster juncfiles
+### Cluster juncfiles
+
 ```bash
 python leafcutter/clustering/leafcutter_cluster_regtools.py -j juncfiles.txt -m 50 -o Experiment -l 500000
 ```
 
-Prep annotation for leafcutter
+### Prep annotation for leafcutter
+
 ```bash
 leafcutter/leafviz/gtf2leafcutter.pl -o gencode.v44 gencode.v44.annotation.gtf
 ```
 
 
-Create groups_file.txt. Example:
+### Create groups_file.txt
+
+Example:
+
 ```
 Sample1_Aligned.sorted.bam WT
 Sample2_Aligned.sorted.bam WT
@@ -100,14 +114,16 @@ Sample7_Aligned.sorted.bam KO
 Sample8_Aligned.sorted.bam KO
 ```
 
-Run leafcutter:
+### Run leafcutter
+
 ```bash
 Rscript leafcutter/scripts/leafcutter_ds.R --num_threads 64 Experiment_perind_numers.counts.gz groups_file.txt --min_samples_per_intron 4 --min_samples_per_group 4 -o Experiment
 ```
 
-Create RData file for leafviz:
+### Create RData file for leafviz
+
 ```bash
-Rscript ../../leafcutter/leafviz/prepare_results.R --meta_data_file groups_file.txt \
+Rscript leafcutter/leafviz/prepare_results.R --meta_data_file groups_file.txt \
   --code leafcutter Experiment_perind_numers.counts.gz \
   Experiment_cluster_significance.txt \
   Experiment_effect_sizes.txt \
@@ -115,12 +131,13 @@ Rscript ../../leafcutter/leafviz/prepare_results.R --meta_data_file groups_file.
   -o Experiment.RData
 ```
 
-Exit container. Run leafviz locally (for instance with RStudio)
+### Exit container. Run leafviz locally (for instance with RStudio)
+
 ```r
 options(shiny.host = "0.0.0.0")
 options(shiny.port = 3838)
 library(leafviz)
-leafviz("~/Lab_Work/CCRRBL-5/leafviz/Experiment.RData")
+leafviz("Experiment.RData")
 ```
 
 
