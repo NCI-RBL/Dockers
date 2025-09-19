@@ -104,3 +104,5 @@ nav:
     - Description: LEAFCUTTER/descript.md
     - Initialize: LEAFCUTTER/init.md
     - Run: LEAFCUTTER/run.md
+  - Tailer:
+    - Workflow : Tailer/Tailer_workflow.md
