@@ -104,7 +104,7 @@ hg38:
   stardir: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/index'
   stargtf: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/gencode.v44.annotation.gtf'
   gencodepath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/gencode.v44.annotation.tsv'
-  intronpath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/hg38.GENCODE_V44_introns.bed'
+  intronpath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/KnownGene_introns.hg38.GENCODE_V44.bed.txt'
   utrpath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/'
 
 mm10:
