@@ -9,6 +9,8 @@ It checks files with `samtools quickcheck`, coordinate-sorts inputs whose header
 
 ## Cluster Setup
 
+Download the script from [GitHub](https://github.com/NCI-RBL/Dockers/blob/main/workflows/CRAM/cram.sh).
+
 The script requires Bash and `samtools` on `PATH`. On clusters that use environment modules, load samtools in the shell or job environment, for example:
 
 ```bash
