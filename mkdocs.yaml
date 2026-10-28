@@ -106,3 +106,5 @@ nav:
     - Run: LEAFCUTTER/run.md
   - Tailer:
     - Workflow : Tailer/Tailer_workflow.md
+  - CRAM:
+    - Workflow : CRAM/CRAM_workflow.md
