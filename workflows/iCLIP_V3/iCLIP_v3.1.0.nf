@@ -117,7 +117,7 @@ process Create_Project_Annotations {
            \$17, \$18, \$19, \$20, \$21, \$22, \$23, \$24, \$25}' !{params."${params.reference}".gencodepath} \\
              > !{params.workdir}/04_annotation/01_project/gencode.!{params.reference}.bed
         cp !{params."${params.reference}".intronpath} !{params.workdir}/04_annotation/01_project/KnownGene_introns.!{params.reference}.bed
-        cp !{params."${params.reference}".utrpath}/KnownGene_*UTR.!{params.reference}.bed !{params.workdir}/04_annotation/01_project/
+        cp !{params."${params.reference}".utrpath}/KnownGene_*UTR.!{params.reference}*.bed !{params.workdir}/04_annotation/01_project/
 
         awk -v OFS='\t' '{if (\$4 ~ /HY/ || \$4 == "7SK") print \$1, \$2, \$3, \$4, \$5, \$6}' !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed > !{params.workdir}/04_annotation/01_project/ncRNA.bed
         awk -v OFS='\t' '{if (\$4 !~ /HY/ && \$5 == "scRNA") print \$1, \$2, \$3, "other_scRNA", \$4, \$6}' !{params.workdir}/04_annotation/01_project/rmsk.!{params.reference}.bed >> !{params.workdir}/04_annotation/01_project/ncRNA.bed
@@ -732,7 +732,7 @@ process Peak_Annotation {
 
         bedtools intersect -s -wao \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
-          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.!{params.reference}.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.!{params.reference}.bed \\
+          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.!{params.reference}*.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.!{params.reference}*.bed \\
           -names 5UTR 3UTR \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.UTRs.!{params.reference}.intersect.SameStrand.bed
 
@@ -760,7 +760,7 @@ process Peak_Annotation {
 
         bedtools intersect -S -wao \\
           -a !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.bed \\
-          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.!{params.reference}.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.!{params.reference}.bed \\
+          -b !{params.workdir}/04_annotation/01_project/KnownGene_5UTR.!{params.reference}*.bed !{params.workdir}/04_annotation/01_project/KnownGene_3UTR.!{params.reference}*.bed \\
           -names 5UTR 3UTR \\
             > !{params.workdir}/04_annotation/02_peaks/!{samplefile}_!{params.peakid}readPeaks_AllRegions.UTRs.!{params.reference}.intersect.OppoStrand.bed
 

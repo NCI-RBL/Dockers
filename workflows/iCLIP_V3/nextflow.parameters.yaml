@@ -90,17 +90,23 @@ fastq_val: "/data/RBL_NCI/iCLIP/bin/fastQValidator"
 
 # BIOWULF
 hg38:
-  stardir: '/data/RBL_NCI/iCLIP/index/active/2022_0505/hg38/index'
-  stargtf: '/data/RBL_NCI/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
-  gencodepath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
-  gencodedir: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/'
-  refseqpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
-  canonicalpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
-  intronpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
+#  stardir: '/data/RBL_NCI/iCLIP/index/active/2022_0505/hg38/index'
+#  stargtf: '/data/RBL_NCI/iCLIP/index/active/2022_0505/hg38/ref/gencode.v32.annotation.gtf'
+#  gencodepath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/gencode.v32.annotation.gtf.txt'
+#  gencodedir: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/'
+#  refseqpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/NCBI_RefSeq/GCF_000001405.39_GRCh38.p13_genomic.gtf.txt'
+#  canonicalpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownCanonical/KnownCanonical_GencodeM32_GRCh38.txt'
+#  intronpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromUCSC/KnownGene/KnownGene_GencodeV32_GRCh38_introns.bed'
   rmskpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/repeatmasker/rmsk_GRCh38.txt'
   aliaspath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/hg38.chromAlias.txt'
   additionalannopath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/additional_anno/'
-  utrpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/'
+#  utrpath: '/data/RBL_NCI/iCLIP/ref/annotations/hg38/Gencode_V32/fromGencode/'
+  stardir: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/index'
+  stargtf: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/gencode.v44.annotation.gtf'
+  gencodepath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/gencode.v44.annotation.tsv'
+  intronpath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/KnownGene_introns.hg38.GENCODE_V44.bed.txt'
+  utrpath: '/data/RBL_NCI/iCLIP/index/active/2026_0330/hg38_no_alt/ref/'
+
 mm10:
   stardir: '/data/RBL_NCI/iCLIP/index/active/2022_0505/mm10/index'
   stargtf: '/data/RBL_NCI/iCLIP/index/active/2022_0505/mm10/ref/gencode.vM23.annotation.gtf'
