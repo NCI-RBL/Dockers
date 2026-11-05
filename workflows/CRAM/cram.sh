@@ -66,6 +66,64 @@ resolve_reference() {
     esac
 }
 
+check_reference() {
+    local header="$1" input="$2" result
+    if result=$(awk -F '\t' '
+        function read_sq(line, fields, field_count, field_index) {
+            field_count = split(line, fields, "\t")
+            sq_name = sq_length = sq_md5 = ""
+            for (field_index = 2; field_index <= field_count; field_index++) {
+                if (fields[field_index] ~ /^SN:/) sq_name = substr(fields[field_index], 4)
+                else if (fields[field_index] ~ /^LN:/) sq_length = substr(fields[field_index], 4)
+                else if (fields[field_index] ~ /^M5:/) sq_md5 = substr(fields[field_index], 4)
+            }
+        }
+        FNR == NR {
+            if ($1 == "@SQ") {
+                read_sq($0)
+                if (sq_name != "") {
+                    reference_length[sq_name] = sq_length
+                    reference_md5[sq_name] = sq_md5
+                }
+            }
+            next
+        }
+        $1 == "@SQ" {
+            read_sq($0)
+            if (sq_name == "") next
+            checked++
+            if (!(sq_name in reference_length)) {
+                print "ERROR: reference is missing sequence " sq_name
+                errors++
+            } else {
+                if (sq_length != reference_length[sq_name]) {
+                    print "ERROR: sequence length mismatch for " sq_name \
+                        " (input=" sq_length ", reference=" reference_length[sq_name] ")"
+                    errors++
+                }
+                if (sq_md5 != "" && tolower(sq_md5) != tolower(reference_md5[sq_name])) {
+                    print "ERROR: sequence M5 mismatch for " sq_name
+                    errors++
+                } else if (sq_md5 == "") {
+                    missing_md5++
+                }
+            }
+        }
+        END {
+            if (checked == 0) print "WARNING: input has no @SQ records; reference identity was not checked"
+            if (missing_md5 > 0) print "WARNING: " missing_md5 \
+                " input sequence(s) lack M5 checksums; checked names and lengths only"
+            if (errors > 0) exit 1
+        }
+    ' <(printf '%s\n' "$REFERENCE_DICT") <(printf '%s\n' "$header")); then
+        [[ -z "$result" ]] || log "$input: $result"
+        return 0
+    fi
+
+    [[ -z "$result" ]] || log "$input: $result"
+    return 1
+}
+
 # Apply command-line options before validating shared prerequisites.
 while getopts ":r:t:v:o:fncdh" opt; do
     case "$opt" in
@@ -90,6 +148,7 @@ command -v samtools >/dev/null || die "samtools not found in PATH"
 [[ -n "$REFERENCE" ]] || die "No reference given (use -r or set CRAM_REFERENCE)"
 [[ -s "$REFERENCE" ]] || die "Reference not found: $REFERENCE"
 [[ -s "${REFERENCE}.fai" ]] || die "Reference index missing: run 'samtools faidx $REFERENCE'"
+REFERENCE_DICT=$(samtools dict -H "$REFERENCE") || die "Could not build sequence dictionary from reference: $REFERENCE"
 [[ "$THREADS" =~ ^[0-9]+$ ]] || die "Threads must be an integer: $THREADS"
 [[ -z "$OUTDIR" ]] || mkdir -p "$OUTDIR" || die "Cannot create $OUTDIR"
 
@@ -129,6 +188,10 @@ for in in "$@"; do
     log "START $in -> $out"
     if ! header=$(samtools view -H -T "$REFERENCE" "$in"); then
         log "FAIL $in: could not read alignment header"
+        failed=$((failed + 1)); failed_files+=("$in"); continue
+    fi
+    if ! check_reference "$header" "$in"; then
+        log "FAIL $in: reference check failed"
         failed=$((failed + 1)); failed_files+=("$in"); continue
     fi
     sort_order=$(printf '%s\n' "$header" | awk -F '\t' '$1 == "@HD" { for (i = 2; i <= NF; i++) if ($i ~ /^SO:/) { sub(/^SO:/, "", $i); print $i; exit } }')

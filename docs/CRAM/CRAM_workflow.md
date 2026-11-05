@@ -125,7 +125,7 @@ Without `-o`, each output is placed next to its input. Inputs that do not end in
 
 ## Reference Caution
 
-The script checks that the reference and its `.fai` exist, but that does not prove the reference is the correct assembly for an input. Samtools may detect a mismatch using reference checksums in CRAM metadata, but this is not guaranteed for every file. The `-c` option verifies record counts only; it does not verify that the reference sequence is correct.
+Before conversion, the script compares each input's `@SQ` sequence dictionary with the selected reference. It fails on missing contigs, sequence length differences, or `M5` checksum differences when the input header includes those checksums. If an input lacks `M5` values, the script warns that it checked contig names and lengths only; assemblies with identical names and lengths but different bases cannot be distinguished from that header. The `-c` option still verifies record counts only and is not a substitute for the reference check.
 
 ## Troubleshooting
 
